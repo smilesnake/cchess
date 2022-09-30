@@ -13,33 +13,20 @@ import com.chess.engine.player.ai.MoveBook;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -49,39 +36,61 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-import static com.chess.engine.pieces.Piece.*;
-import static javafx.scene.control.Alert.*;
+import static com.chess.engine.pieces.Piece.PieceType;
+import static javafx.scene.control.Alert.AlertType;
 
+/**
+ * 棋盘表格
+ */
 public class Table extends BorderPane {
 
+    /**
+     * 面板宽度
+     */
     private static final int BOARD_WIDTH = 540;
+    /**
+     * 面板高度
+     */
     private static final int BOARD_HEIGHT = 600;
+    /**
+     * 点的宽度
+     */
     private static final int POINT_WIDTH = 60;
+    /**
+     * 棋盘图片
+     */
     private static final Image BOARD_IMAGE = new Image(Table.class.getResourceAsStream("/graphics/board.png"));
-    private static final Image HIGHLIGHT_LEGALS_IMAGE =
-            new Image(Table.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "dot.png"));
-    private static final Border HIGHLIGHT_LAST_MOVE_BORDER =
-            new Border(new BorderStroke(Color.WHITE, BorderStrokeStyle.DASHED,
-                    new CornerRadii(POINT_WIDTH / 2), new BorderWidths(2)));
-    private static final Border HIGHLIGHT_SELECTED_PIECE_BORDER =
-            new Border(new BorderStroke(Color.WHITE, BorderStrokeStyle.SOLID,
-                    new CornerRadii(POINT_WIDTH / 2), new BorderWidths(2)));
+    /**
+     * 规则图片高亮图片，即当前棋子所有可落子点位的单个点位图片
+     */
+    private static final Image HIGHLIGHT_LEGALS_IMAGE = new Image(Table.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "dot.png"));
+    /**
+     * 高亮最后移动的虚线边框
+     */
+    private static final Border HIGHLIGHT_LAST_MOVE_BORDER = new Border(new BorderStroke(Color.WHITE, BorderStrokeStyle.DASHED, new CornerRadii(POINT_WIDTH / 2), new BorderWidths(2)));
+    /**
+     * 高亮选中移动的虚线边框
+     */
+    private static final Border HIGHLIGHT_SELECTED_PIECE_BORDER = new Border(new BorderStroke(Color.WHITE, BorderStrokeStyle.SOLID, new CornerRadii(POINT_WIDTH / 2), new BorderWidths(2)));
+    /**
+     * 象棋WIKI
+     */
     private static final String WIKI_XIANGQI = "https://en.wikipedia.org/wiki/Xiangqi";
+    /**
+     * 棋子图片Map
+     */
     static final Map<String, Image> PIECE_IMAGE_MAP = getPieceImageMap();
+    /**
+     * 表格实例
+     */
     private static final Table TABLE_INSTANCE = new Table();
-
+    /**
+     * 游戏设置对话框
+     */
     private final GameSetup gameSetup;
     private final BoardPane boardPane;
     private final MoveHistoryPane moveHistoryPane;
@@ -121,6 +130,7 @@ public class Table extends BorderPane {
 
     /**
      * Returns an instance of this table.
+     *
      * @return An instance of this table.
      */
     public static Table getInstance() {
@@ -140,26 +150,25 @@ public class Table extends BorderPane {
      * Creates and returns a game menu for the menu bar.
      */
     private Menu createGameMenu() {
-        Menu gameMenu = new Menu("Game");
+        Menu gameMenu = new Menu("游戏");
 
-        MenuItem newGame = new MenuItem("New");
+        MenuItem newGame = new MenuItem("新局");
         newGame.setOnAction(e -> {
             if (fullMovelog.isEmpty()) {
                 showAlert(AlertType.INFORMATION, "New", "No moves made");
                 return;
             }
-            showAlert(AlertType.CONFIRMATION, "New", "Start a new game?")
-                    .ifPresent(response -> {
-                        if (response.equals(ButtonType.OK)) {
-                            aiObserver.stopAI();
-                            exitReplayMode();
-                            restart();
-                            notifyAIObserver("newgame");
-                        }
-                    });
+            showAlert(AlertType.CONFIRMATION, "New", "Start a new game?").ifPresent(response -> {
+                if (response.equals(ButtonType.OK)) {
+                    aiObserver.stopAI();
+                    exitReplayMode();
+                    restart();
+                    notifyAIObserver("新游戏");
+                }
+            });
         });
 
-        MenuItem saveGame = new MenuItem("Save...");
+        MenuItem saveGame = new MenuItem("保存...");
         saveGame.setOnAction(e -> {
             if (fullMovelog.isEmpty()) {
                 showAlert(AlertType.INFORMATION, "Save", "No moves made");
@@ -168,10 +177,10 @@ public class Table extends BorderPane {
             saveGame();
         });
 
-        MenuItem loadGame = new MenuItem("Load...");
+        MenuItem loadGame = new MenuItem("加载...");
         loadGame.setOnAction(e -> loadGame());
 
-        MenuItem exit = new MenuItem("Exit");
+        MenuItem exit = new MenuItem("退出");
         exit.setOnAction(e -> System.exit(0));
 
         gameMenu.getItems().addAll(newGame, new SeparatorMenuItem(), saveGame, loadGame, new SeparatorMenuItem(), exit);
@@ -183,12 +192,12 @@ public class Table extends BorderPane {
      * Creates and returns an options menu for the menu bar.
      */
     private Menu createOptionsMenu() {
-        Menu optionsMenu = new Menu("Options");
+        Menu optionsMenu = new Menu("选项");
 
-        MenuItem undoTurn = new MenuItem("Undo last turn");
+        MenuItem undoTurn = new MenuItem("悔棋(对手且当前玩家皆退一步)");
         undoTurn.setOnAction(e -> {
             if (fullMovelog.getSize() < 2) {
-                showAlert(AlertType.INFORMATION, "Undo last turn", "No turns made");
+                showAlert(AlertType.INFORMATION, "悔棋(对手且当前玩家皆退一步)", "无法悔棋");
                 return;
             }
             aiObserver.stopAI();
@@ -197,10 +206,10 @@ public class Table extends BorderPane {
             notifyAIObserver("undoturn");
         });
 
-        MenuItem undoMove = new MenuItem("Undo last move");
+        MenuItem undoMove = new MenuItem("悔棋(当前玩家悔一步)");
         undoMove.setOnAction(e -> {
             if (fullMovelog.isEmpty()) {
-                showAlert(AlertType.INFORMATION, "Undo last move", "No moves made");
+                showAlert(AlertType.INFORMATION, "悔棋(当前玩家悔一步)", "无法悔棋");
                 return;
             }
             aiObserver.stopAI();
@@ -209,46 +218,44 @@ public class Table extends BorderPane {
             notifyAIObserver("undomove");
         });
 
-        MenuItem playFromMove = new MenuItem("Play from selected move");
+        MenuItem playFromMove = new MenuItem("从选定的移动开始游戏（即从指定步数开始玩）");
         playFromMove.setOnAction(e -> {
             if (!moveHistoryPane.isInReplayMode()) {
-                showAlert(AlertType.INFORMATION, "Play from selected move", "No move selected");
+                showAlert(AlertType.INFORMATION, "从选定的移动开始游戏（即从指定步数开始玩）", "没有选择移动");
                 return;
             }
-            showAlert(AlertType.CONFIRMATION, "Play from selected move",
-                    "Subsequent moves will be deleted. Continue?")
-                    .ifPresent(response -> {
-                        if (response.equals(ButtonType.OK)) {
-                            playFromSelectedMove();
-                            notifyAIObserver("playfrommove");
-                        }
-                    });
+            showAlert(AlertType.CONFIRMATION, "从选定的移动开始游戏（即从指定步数开始玩）", "S后续的移动将被删除.继续?").ifPresent(response -> {
+                if (response.equals(ButtonType.OK)) {
+                    playFromSelectedMove();
+                    notifyAIObserver("playfrommove");
+                }
+            });
         });
 
-        MenuItem banMove = new MenuItem("Ban selected move");
+        MenuItem banMove = new MenuItem("禁止选择移动");
         banMove.setOnAction(e -> {
             if (!moveHistoryPane.isInReplayMode()) {
-                showAlert(AlertType.INFORMATION, "Ban selected move", "No move selected");
+                showAlert(AlertType.INFORMATION, "禁止选择移动", "没有移动选择");
                 return;
             }
             Move bannedMove = partialMovelog.getLastMove();
             bannedMoves.add(bannedMove);
-            showAlert(AlertType.INFORMATION, "Ban selected move", bannedMove.toString() + " has been banned");
+            showAlert(AlertType.INFORMATION, "禁止选择移动", bannedMove.toString() + " 已经被禁止");
         });
 
-        MenuItem unbanAll = new MenuItem("Unban all");
+        MenuItem unbanAll = new MenuItem("解除所有禁止移动（取消所有禁止）");
         unbanAll.setOnAction(e -> {
             if (bannedMoves.isEmpty()) {
-                showAlert(AlertType.INFORMATION, "Unban all", "No moves banned");
+                showAlert(AlertType.INFORMATION, "解除所有禁止移动（取消所有禁止）", "没有禁止移动");
                 return;
             }
             aiObserver.stopAI();
-            showAlert(AlertType.INFORMATION, "Unban all", "All moves unbanned");
+            showAlert(AlertType.INFORMATION, "解除所有禁止移动（取消所有禁止）", "所有禁止移动被解除");
             bannedMoves.clear();
             notifyAIObserver("unban");
         });
 
-        MenuItem setup = new MenuItem("Setup...");
+        MenuItem setup = new MenuItem("设置...");
         setup.setOnAction(e -> {
             clearSelections();
             aiObserver.stopAI();
@@ -261,8 +268,7 @@ public class Table extends BorderPane {
             notifyAIObserver("setup");
         });
 
-        optionsMenu.getItems().addAll(undoTurn, undoMove, playFromMove, new SeparatorMenuItem(),
-                banMove, unbanAll, new SeparatorMenuItem(), setup);
+        optionsMenu.getItems().addAll(undoTurn, undoMove, playFromMove, new SeparatorMenuItem(), banMove, unbanAll, new SeparatorMenuItem(), setup);
 
         return optionsMenu;
     }
@@ -271,13 +277,13 @@ public class Table extends BorderPane {
      * Creates and returns a preferences menu for the menu bar.
      */
     private Menu createPreferencesMenu() {
-        Menu prefMenu = new Menu("Preferences");
+        Menu prefMenu = new Menu("首选项");
 
-        CheckMenuItem highlight = new CheckMenuItem("Highlight legal moves");
+        CheckMenuItem highlight = new CheckMenuItem("突出棋子可移动点位");
         highlight.setSelected(highlightLegalMoves);
         highlight.setOnAction(e -> highlightLegalMoves = highlight.isSelected());
 
-        MenuItem flipBoard = new MenuItem("Flip board");
+        MenuItem flipBoard = new MenuItem("翻转棋盘");
         flipBoard.setOnAction(e -> boardPane.flipBoard());
 
         prefMenu.getItems().addAll(highlight, new SeparatorMenuItem(), flipBoard);
@@ -289,9 +295,9 @@ public class Table extends BorderPane {
      * Creates and returns a help menu for the menu bar.
      */
     private Menu createHelpMenu() {
-        Menu helpMenu = new Menu("Help");
+        Menu helpMenu = new Menu("帮助");
 
-        MenuItem rules = new MenuItem("Rules...");
+        MenuItem rules = new MenuItem("规则...");
         rules.setOnAction(e -> {
             try {
                 Desktop.getDesktop().browse(new URL(WIKI_XIANGQI).toURI());
@@ -300,7 +306,7 @@ public class Table extends BorderPane {
             }
         });
 
-        MenuItem controls = new MenuItem("Controls...");
+        MenuItem controls = new MenuItem("控制...");
         controls.setOnAction(e -> helpWindow.showAndWait());
 
         helpMenu.getItems().addAll(rules, controls);
@@ -409,7 +415,9 @@ public class Table extends BorderPane {
      * Enters play mode from the selected move in replay mode.
      */
     private void playFromSelectedMove() {
-        if (!moveHistoryPane.isInReplayMode()) return;
+        if (!moveHistoryPane.isInReplayMode()) {
+            return;
+        }
 
         fullMovelog = partialMovelog;
         exitReplayMode();
@@ -428,10 +436,13 @@ public class Table extends BorderPane {
 
     /**
      * Exits replay mode if moveIndex = -1; else enters replay mode at the given moveIndex.
+     *
      * @param moveIndex The index of the move in the full movelog.
      */
     void jumpToMove(int moveIndex) {
-        if (moveIndex < -1 || moveIndex >= fullMovelog.getSize()) return;
+        if (moveIndex < -1 || moveIndex >= fullMovelog.getSize()) {
+            return;
+        }
         if (moveIndex == -1) {
             int currIndex = partialMovelog.getSize() - 1;
             partialMovelog = null;
@@ -466,6 +477,7 @@ public class Table extends BorderPane {
 
     /**
      * Checks if the current AI's moves are randomised.
+     *
      * @return true if the current AI's moves are randomised, false otherwise.
      */
     public boolean isAIRandomised() {
@@ -583,8 +595,7 @@ public class Table extends BorderPane {
                 }
             }
 
-            BackgroundImage boardImage = new BackgroundImage(BOARD_IMAGE, BackgroundRepeat.NO_REPEAT,
-                    BackgroundRepeat.NO_REPEAT, null, null);
+            BackgroundImage boardImage = new BackgroundImage(BOARD_IMAGE, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, null, null);
             setBackground(new Background(boardImage));
             setPrefSize(BOARD_WIDTH, BOARD_HEIGHT);
             setMinSize(BOARD_WIDTH, BOARD_HEIGHT);
@@ -594,6 +605,7 @@ public class Table extends BorderPane {
 
         /**
          * Redraws this board pane given the board.
+         *
          * @param board The current board.
          */
         private void drawBoard(Board board) {
@@ -604,8 +616,7 @@ public class Table extends BorderPane {
                 if (boardDirection.isNormal()) {
                     add(pointPane, pointPane.position.getCol(), pointPane.position.getRow());
                 } else {
-                    add(pointPane, Board.NUM_COLS - pointPane.position.getCol(),
-                            Board.NUM_ROWS - pointPane.position.getRow());
+                    add(pointPane, Board.NUM_COLS - pointPane.position.getCol(), Board.NUM_ROWS - pointPane.position.getRow());
                 }
             }
         }
@@ -634,8 +645,7 @@ public class Table extends BorderPane {
             BoardDirection opposite() {
                 return FLIPPED;
             }
-        },
-        FLIPPED {
+        }, FLIPPED {
             @Override
             boolean isNormal() {
                 return false;
@@ -675,16 +685,16 @@ public class Table extends BorderPane {
          */
         private EventHandler<MouseEvent> getMouseEventHandler() {
             return event -> {
-                if (moveHistoryPane.isInReplayMode()) return;
+                if (moveHistoryPane.isInReplayMode()) {
+                    return;
+                }
                 if (event.getButton().equals(MouseButton.SECONDARY)) {
                     clearSelections();
                 } else if (event.getButton().equals(MouseButton.PRIMARY)) {
                     if (sourcePoint == null) {
                         sourcePoint = board.getPoint(position);
                         Optional<Piece> selectedPiece = sourcePoint.getPiece();
-                        if (selectedPiece.isPresent()
-                                && selectedPiece.get().getAlliance() == board.getCurrPlayer().getAlliance()
-                                && !gameSetup.isAIPlayer(board.getCurrPlayer().getAlliance())) {
+                        if (selectedPiece.isPresent() && selectedPiece.get().getAlliance() == board.getCurrPlayer().getAlliance() && !gameSetup.isAIPlayer(board.getCurrPlayer().getAlliance())) {
                             Table.this.selectedPiece = selectedPiece.get();
                         } else {
                             sourcePoint = null;
@@ -692,7 +702,9 @@ public class Table extends BorderPane {
                     } else {
                         destPoint = board.getPoint(position);
                         Optional<Move> move = board.getMove(sourcePoint.getPosition(), destPoint.getPosition());
-                        if (!move.isPresent()) return;
+                        if (!move.isPresent()) {
+                            return;
+                        }
 
                         board.makeMove(move.get());
                         if (board.isStateAllowed()) {
@@ -715,6 +727,7 @@ public class Table extends BorderPane {
 
         /**
          * Redraws this point pane given the board.
+         *
          * @param board The current board.
          */
         private void drawPoint(Board board) {
@@ -725,6 +738,7 @@ public class Table extends BorderPane {
 
         /**
          * Assigns an image to this point pane given the current piece (if any) on it.
+         *
          * @param board The current board.
          */
         private void assignPointPieceIcon(Board board) {
@@ -741,8 +755,7 @@ public class Table extends BorderPane {
         }
 
         /**
-         * Highlights (using a border) this point pane if it contains the selected piece
-         * OR it was part of the previous move.
+         * Highlights (using a border) this point pane if it contains the selected piece OR it was part of the previous move.
          */
         private void highlightLastMoveAndSelectedPiece() {
             Move lastMove;
@@ -774,10 +787,13 @@ public class Table extends BorderPane {
 
         /**
          * Highlights (using a dot) this point pane if it is one of the legal destinations of the selected piece.
+         *
          * @param board The current board.
          */
         private void highlightPossibleMoves(Board board) {
-            if (!highlightLegalMoves) return;
+            if (!highlightLegalMoves) {
+                return;
+            }
             for (Move move : pieceLegalMoves(board)) {
                 board.makeMove(move);
                 // check for suicidal move
@@ -824,9 +840,7 @@ public class Table extends BorderPane {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (!Table.getInstance().moveHistoryPane.isInReplayMode()
-                    && getInstance().gameSetup.isAIPlayer(getInstance().board.getCurrPlayer().getAlliance())
-                    && !getInstance().board.isCurrPlayerCheckmated()) {
+            if (!Table.getInstance().moveHistoryPane.isInReplayMode() && getInstance().gameSetup.isAIPlayer(getInstance().board.getCurrPlayer().getAlliance()) && !getInstance().board.isCurrPlayerCheckmated()) {
                 Optional<Move> move = MoveBook.getRandomMove(getInstance().board.getZobristKey());
                 if (move.isPresent()) {
                     task = getTimerTask(move.get());
@@ -834,8 +848,7 @@ public class Table extends BorderPane {
                     return;
                 }
 
-                AIPlayer aiPlayer = getInstance().gameSetup.isAITimeLimited()
-                                ? new FixedTimeAIPlayer() : new FixedDepthAIPlayer();
+                AIPlayer aiPlayer = getInstance().gameSetup.isAITimeLimited() ? new FixedTimeAIPlayer() : new FixedDepthAIPlayer();
                 aiPlayers.push(aiPlayer);
                 Thread th = new Thread(aiPlayer);
                 th.setDaemon(true);
@@ -903,8 +916,7 @@ public class Table extends BorderPane {
                 Board board = getInstance().board.getCopy();
                 for (Move move : legalMoves) {
                     board.makeMove(move);
-                    if (move.getMovedPiece().equals(bannedPiece) && !move.isCapture()
-                            && board.getCurrPlayer().isInCheck()) {
+                    if (move.getMovedPiece().equals(bannedPiece) && !move.isCapture() && board.getCurrPlayer().isInCheck()) {
                         bannedMoves.add(move);
                     }
                     board.unmakeMove(move);
@@ -924,13 +936,13 @@ public class Table extends BorderPane {
             }
 
             List<Move> moveHistory = getInstance().fullMovelog.getMoves();
-            Move move = moveHistory.get(moveHistory.size() - MAX_CONSEC_CHECKS*2);
+            Move move = moveHistory.get(moveHistory.size() - MAX_CONSEC_CHECKS * 2);
             if (move.isCapture()) {
                 return null;
             }
             Piece movedPiece = move.getMovedPiece().movePiece(move);
             for (int i = 1; i < MAX_CONSEC_CHECKS; i++) {
-                move = moveHistory.get(moveHistory.size() - MAX_CONSEC_CHECKS*2 + i*2);
+                move = moveHistory.get(moveHistory.size() - MAX_CONSEC_CHECKS * 2 + i * 2);
                 if (!move.getMovedPiece().equals(movedPiece) || move.isCapture()) {
                     return null;
                 }
@@ -962,7 +974,9 @@ public class Table extends BorderPane {
 
         @Override
         public void done() {
-            if (isCancelled()) return;
+            if (isCancelled()) {
+                return;
+            }
             try {
                 bestMove = get();
                 if (System.currentTimeMillis() > startTime + AIObserver.MIN_TIME) {
@@ -987,8 +1001,7 @@ public class Table extends BorderPane {
          */
         private void move() {
             Platform.runLater(() -> AIObserver.makeMove(bestMove));
-            System.out.println(bestMove.toString() + " | "
-                    + (System.currentTimeMillis() - startTime)/1000 + "s | " + "depth " + searchDepth);
+            System.out.println(bestMove.toString() + " | " + (System.currentTimeMillis() - startTime) / 1000 + "s | " + "depth " + searchDepth);
         }
 
         /**
@@ -1020,8 +1033,7 @@ public class Table extends BorderPane {
             task = getTimerTask();
             searchTime = getInstance().gameSetup.getSearchTime();
             timer.schedule(task, searchTime * 1000);
-            return new FixedTimeSearch(getInstance().board.getCopy(), legalMoves, this,
-                    System.currentTimeMillis() + searchTime*1000).search();
+            return new FixedTimeSearch(getInstance().board.getCopy(), legalMoves, this, System.currentTimeMillis() + searchTime * 1000).search();
         }
 
         @Override
@@ -1038,8 +1050,7 @@ public class Table extends BorderPane {
                 @Override
                 public void run() {
                     Platform.runLater(() -> AIObserver.makeMove(currBestMove));
-                    System.out.println(currBestMove.toString() + " | "
-                            + searchTime + "s | " + "depth " + currDepth);
+                    System.out.println(currBestMove.toString() + " | " + searchTime + "s | " + "depth " + currDepth);
                     FixedTimeAIPlayer.this.cancel(true);
                 }
             };
@@ -1047,15 +1058,21 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Represents a human or AI player type.
+     * 玩家类型.
      */
     public enum PlayerType {
+        /**
+         * 人类
+         */
         HUMAN {
             @Override
             boolean isAI() {
                 return false;
             }
         },
+        /**
+         * 电脑
+         */
         AI {
             @Override
             boolean isAI() {
@@ -1063,19 +1080,30 @@ public class Table extends BorderPane {
             }
         };
 
+        /**
+         * 是否AI
+         *
+         * @return true，ai,否则，false
+         */
         abstract boolean isAI();
     }
 
     /**
-     * Represents a time- or depth-fixed AI player type.
+     * AI玩家类型
      */
     public enum AIType {
+        /**
+         * 时间
+         */
         TIME {
             @Override
             boolean isTimeLimited() {
                 return true;
             }
         },
+        /**
+         * 深度
+         */
         DEPTH {
             @Override
             boolean isTimeLimited() {
@@ -1083,6 +1111,11 @@ public class Table extends BorderPane {
             }
         };
 
+        /**
+         * 是否限制时间
+         *
+         * @return true, 有时间限制，否则，false
+         */
         abstract boolean isTimeLimited();
     }
 }

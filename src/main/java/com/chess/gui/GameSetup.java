@@ -3,49 +3,84 @@ package com.chess.gui;
 import com.chess.engine.Alliance;
 import com.chess.gui.Table.PlayerType;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.chess.gui.Table.*;
-import static javafx.scene.control.Alert.*;
-import static javafx.scene.control.ButtonBar.*;
+import static com.chess.gui.Table.AIType;
+import static javafx.scene.control.Alert.AlertType;
+import static javafx.scene.control.ButtonBar.ButtonData;
 
 /**
- * A dialog for changing game settings.
+ * 游戏设置对话框
  */
 class GameSetup extends Dialog {
-
-    private static final String HUMAN_TEXT = "Human";
+    /**
+     * 人类文本
+     */
+    private static final String HUMAN_TEXT = "人类";
+    /**
+     * AI文本
+     */
     private static final String AI_TEXT = "AI";
-    private static final String FIXED_DEPTH_TEXT = "Depth (levels)";
-    private static final String FIXED_TIME_TEXT = "Time (seconds)";
+    /**
+     * 固定的深度文本
+     */
+    private static final String FIXED_DEPTH_TEXT = "深度(级别)";
+    /**
+     * 固定的时间文本
+     */
+    private static final String FIXED_TIME_TEXT = "时间(秒)";
+    /**
+     * 最小深度
+     */
     private static final int MIN_DEPTH = 1;
+    /**
+     * 最大尝试
+     */
     private static final int MAX_DEPTH = 12;
+    /**
+     * 最小时间
+     */
     private static final int MIN_TIME = 1;
+    /**
+     * 最大时间
+     */
     private static final int MAX_TIME = 180;
+    /**
+     * 游戏设置实例
+     */
     private static final GameSetup SETUP = new GameSetup();
 
+    /**
+     * 红色玩家类型
+     */
     private PlayerType redPlayerType;
+    /**
+     * 黑色玩家类型
+     */
     private PlayerType blackPlayerType;
+    /**
+     * AI玩家类型
+     */
     private AIType aiType;
+    /**
+     * 检索深度
+     */
     private int searchDepth;
+    /**
+     * 检索时间
+     */
     private int searchTime;
+    /**
+     * 当前AI的移动是否是随机的，true，随机，否则，false
+     */
     private boolean isAIRandomised;
 
     private GameSetup() {
-        // default settings
+        // 默认设置
         redPlayerType = PlayerType.HUMAN;
         blackPlayerType = PlayerType.HUMAN;
         aiType = AIType.DEPTH;
@@ -53,8 +88,11 @@ class GameSetup extends Dialog {
         searchTime = 10;
         isAIRandomised = false;
 
+        // 对话框面板
         DialogPane dialogPane = new DialogPane();
+        // 网格面板
         GridPane gridPane = new GridPane();
+        // 节点列表
         List<Node> nodes = new ArrayList<>();
 
         Label redHeader = GuiUtil.getHeader("RED player");
@@ -87,12 +125,12 @@ class GameSetup extends Dialog {
         Spinner searchTimeSpinner = new Spinner(MIN_TIME, MAX_TIME, searchTime, 10);
         searchTimeSpinner.setEditable(true);
 
-        CheckBox randomiseAICheckbox = new CheckBox("Randomise moves");
+        CheckBox randomiseAICheckbox = new CheckBox("AI的移动是否随机");
         randomiseAICheckbox.setAllowIndeterminate(false);
         randomiseAICheckbox.setSelected(isAIRandomised);
 
-        ButtonType cancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-        ButtonType ok = new ButtonType("OK", ButtonData.OK_DONE);
+        ButtonType cancel = new ButtonType("取消", ButtonData.CANCEL_CLOSE);
+        ButtonType ok = new ButtonType("确定", ButtonData.OK_DONE);
         dialogPane.getButtonTypes().addAll(ok, cancel);
         Button cancelButton = (Button) dialogPane.lookupButton(cancel);
         cancelButton.setOnAction(e -> {
@@ -125,7 +163,7 @@ class GameSetup extends Dialog {
                 searchDepth = (int) searchDepthSpinner.getValue();
             } catch (NumberFormatException nfe) {
                 Alert alert = new Alert(AlertType.ERROR, "Depth must be an integer from 2 to 8");
-                alert.setTitle("Setup");
+                alert.setTitle("设置");
                 alert.showAndWait();
                 searchDepthSpinner.getEditor().textProperty().set(Integer.toString(searchDepth));
             }
@@ -134,7 +172,7 @@ class GameSetup extends Dialog {
                 searchTime = (int) searchTimeSpinner.getValue();
             } catch (NumberFormatException nfe) {
                 Alert alert = new Alert(AlertType.ERROR, "Time must be an integer from 1 to 180");
-                alert.setTitle("Setup");
+                alert.setTitle("设置");
                 alert.showAndWait();
                 searchTimeSpinner.getEditor().textProperty().set(Integer.toString(searchTime));
             }
@@ -162,7 +200,7 @@ class GameSetup extends Dialog {
         }
         dialogPane.setContent(gridPane);
 
-        setTitle("Setup");
+        setTitle("设置");
         setDialogPane(dialogPane);
         setResizable(false);
         hide();
