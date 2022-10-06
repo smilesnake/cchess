@@ -85,28 +85,73 @@ public class Table extends BorderPane {
      */
     static final Map<String, Image> PIECE_IMAGE_MAP = getPieceImageMap();
     /**
-     * 表格实例
+     * 当前实例
      */
     private static final Table TABLE_INSTANCE = new Table();
     /**
      * 游戏设置对话框
      */
     private final GameSetup gameSetup;
+    /**
+     * 游戏棋盘的面板
+     */
     private final BoardPane boardPane;
+    /**
+     * 移动历史面板
+     */
     private final MoveHistoryPane moveHistoryPane;
+    /**
+     * 信息面板，显示双方获子及当前游戏状态的面板
+     */
     private final InfoPane infoPane;
+    /**
+     * 帮助窗口，显示游戏控制的对话框
+     */
     private final HelpWindow helpWindow;
+    /**
+     * AI玩家观察者
+     */
     private final AIObserver aiObserver;
+    /**
+     * 属性变更支持
+     */
     private final PropertyChangeSupport propertyChangeSupport;
+    /**
+     * 中国象棋棋盘
+     */
     private Board board;
+    /**
+     * 所有移动日志
+     */
     private MoveLog fullMovelog;
+    /**
+     * 部分移动日志
+     */
     private MoveLog partialMovelog;
+    /**
+     * 源点
+     */
     private Point sourcePoint;
+    /**
+     * 目录点
+     */
     private Point destPoint;
+    /**
+     * 选中的棋子
+     */
     private Piece selectedPiece;
+    /**
+     * 禁止移动列表
+     */
     private Collection<Move> bannedMoves;
+    /**
+     * 是否高亮显示移动路径
+     */
     private boolean highlightLegalMoves;
 
+    /**
+     * 私有化当前实例
+     */
     private Table() {
         board = Board.initialiseBoard();
         gameSetup = GameSetup.getInstance();
@@ -122,9 +167,13 @@ public class Table extends BorderPane {
         bannedMoves = new ArrayList<>();
         highlightLegalMoves = true;
 
+        // 顶部菜单条
         setTop(createMenuBar());
+        // 棋盘面板
         setCenter(boardPane);
+        // 右边移动历史面板
         setRight(moveHistoryPane);
+        // 左边信息面板
         setLeft(infoPane);
     }
 
@@ -138,30 +187,42 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Creates and returns a menu bar for this table.
+     * 创建并返回一个菜单栏
+     *
+     * @return 创建好的菜单栏
      */
     private MenuBar createMenuBar() {
+        // 菜单条
         MenuBar menuBar = new MenuBar();
+        // 添加菜单
         menuBar.getMenus().addAll(createGameMenu(), createOptionsMenu(), createPreferencesMenu(), createHelpMenu());
         return menuBar;
     }
 
     /**
-     * Creates and returns a game menu for the menu bar.
+     * 为菜单栏创建并返回一个游戏菜单
+     *
+     * @return 创建好的游戏菜单
      */
     private Menu createGameMenu() {
         Menu gameMenu = new Menu("游戏");
 
-        MenuItem newGame = new MenuItem("新局");
+        MenuItem newGame = new MenuItem("开始新游戏");
         newGame.setOnAction(e -> {
+            // 没有移动，弹窗提示
             if (fullMovelog.isEmpty()) {
-                showAlert(AlertType.INFORMATION, "New", "No moves made");
+                showAlert(AlertType.INFORMATION, "开始新游戏", "未移动");
                 return;
             }
-            showAlert(AlertType.CONFIRMATION, "New", "Start a new game?").ifPresent(response -> {
+            // 弹窗提示
+            showAlert(AlertType.CONFIRMATION, "开始新游戏", "开始新游戏?").ifPresent(response -> {
+                // 同意开始新游戏
                 if (response.equals(ButtonType.OK)) {
+                    // 终止所有正在运行的AI
                     aiObserver.stopAI();
+                    // 退出回放/重播模式
                     exitReplayMode();
+                    // 重新开始
                     restart();
                     notifyAIObserver("新游戏");
                 }
@@ -170,10 +231,12 @@ public class Table extends BorderPane {
 
         MenuItem saveGame = new MenuItem("保存...");
         saveGame.setOnAction(e -> {
+            // 没有移动，弹窗提示
             if (fullMovelog.isEmpty()) {
-                showAlert(AlertType.INFORMATION, "Save", "No moves made");
+                showAlert(AlertType.INFORMATION, "保存", "未移动");
                 return;
             }
+            // 保存游戏
             saveGame();
         });
 
@@ -197,6 +260,7 @@ public class Table extends BorderPane {
         MenuItem undoTurn = new MenuItem("悔棋(对手且当前玩家皆退一步)");
         undoTurn.setOnAction(e -> {
             if (fullMovelog.getSize() < 2) {
+                // 弹窗提示
                 showAlert(AlertType.INFORMATION, "悔棋(对手且当前玩家皆退一步)", "无法悔棋");
                 return;
             }
@@ -209,6 +273,7 @@ public class Table extends BorderPane {
         MenuItem undoMove = new MenuItem("悔棋(当前玩家悔一步)");
         undoMove.setOnAction(e -> {
             if (fullMovelog.isEmpty()) {
+                // 弹窗提示
                 showAlert(AlertType.INFORMATION, "悔棋(当前玩家悔一步)", "无法悔棋");
                 return;
             }
@@ -221,9 +286,11 @@ public class Table extends BorderPane {
         MenuItem playFromMove = new MenuItem("从选定的移动开始游戏（即从指定步数开始玩）");
         playFromMove.setOnAction(e -> {
             if (!moveHistoryPane.isInReplayMode()) {
+                // 弹窗提示
                 showAlert(AlertType.INFORMATION, "从选定的移动开始游戏（即从指定步数开始玩）", "没有选择移动");
                 return;
             }
+            // 弹窗提示
             showAlert(AlertType.CONFIRMATION, "从选定的移动开始游戏（即从指定步数开始玩）", "S后续的移动将被删除.继续?").ifPresent(response -> {
                 if (response.equals(ButtonType.OK)) {
                     playFromSelectedMove();
@@ -235,21 +302,25 @@ public class Table extends BorderPane {
         MenuItem banMove = new MenuItem("禁止选择移动");
         banMove.setOnAction(e -> {
             if (!moveHistoryPane.isInReplayMode()) {
+                // 弹窗提示
                 showAlert(AlertType.INFORMATION, "禁止选择移动", "没有移动选择");
                 return;
             }
             Move bannedMove = partialMovelog.getLastMove();
             bannedMoves.add(bannedMove);
+            // 弹窗提示
             showAlert(AlertType.INFORMATION, "禁止选择移动", bannedMove.toString() + " 已经被禁止");
         });
 
         MenuItem unbanAll = new MenuItem("解除所有禁止移动（取消所有禁止）");
         unbanAll.setOnAction(e -> {
             if (bannedMoves.isEmpty()) {
+                // 弹窗提示
                 showAlert(AlertType.INFORMATION, "解除所有禁止移动（取消所有禁止）", "没有禁止移动");
                 return;
             }
             aiObserver.stopAI();
+            // 弹窗提示
             showAlert(AlertType.INFORMATION, "解除所有禁止移动（取消所有禁止）", "所有禁止移动被解除");
             bannedMoves.clear();
             notifyAIObserver("unban");
@@ -329,26 +400,25 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Saves the current game in-progress into a loadable text file.
+     * 保存游戏,将当前正在进行的游戏保存到可加载的文本文件中
      */
     private void saveGame() {
         FileChooser fc = new FileChooser();
-        fc.setTitle("Save");
+        fc.setTitle("保存");
         File file = fc.showSaveDialog(CChess.stage);
 
         if (file != null) {
             try {
                 PrintWriter pw = new PrintWriter(file);
-                for (Move move : fullMovelog.getMoves()) {
-                    pw.append(move.toString()).append("\n");
-                }
+                // 移动日志追加换行
+                fullMovelog.getMoves().forEach(move -> pw.append(move.toString()).append("\n"));
                 pw.flush();
                 pw.close();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-
-            showAlert(AlertType.INFORMATION, "Save", "Save success");
+            // 弹窗提示
+            showAlert(AlertType.INFORMATION, "保存", "保存成功");
         }
     }
 
@@ -363,6 +433,7 @@ public class Table extends BorderPane {
         if (file != null) {
             LoadGameUtil lgu = new LoadGameUtil(file);
             if (!lgu.isValidFile()) {
+                // 弹窗提示
                 showAlert(AlertType.ERROR, "Load", "Invalid file");
             } else {
                 clearSelections();
@@ -379,7 +450,7 @@ public class Table extends BorderPane {
                 boardPane.drawBoard(board);
 
                 notifyAIObserver("load");
-
+                // 弹窗提示
                 showAlert(AlertType.INFORMATION, "Load", "Load success");
             }
         }
@@ -425,11 +496,14 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Exits replay mode if currently in it.
+     * 如果当前处于回放/重播模式,则退出回放/重播模式
      */
     private void exitReplayMode() {
+        // 当前为回放/重播模式时
         if (moveHistoryPane.isInReplayMode()) {
+            // 禁止回放/重播
             moveHistoryPane.disableReplay();
+            // 终止所有正在运行的AI
             aiObserver.stopAI();
         }
     }
@@ -494,7 +568,12 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Creates an alert given the alert type, title and content strings.
+     * 显示弹窗
+     *
+     * @param alertType 警告类型
+     * @param title     标题
+     * @param content   内容
+     * @return 按钮类型的Optional对象
      */
     private static Optional<ButtonType> showAlert(AlertType alertType, String title, String content) {
         Alert alert = new Alert(alertType, content);
@@ -522,7 +601,7 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Helper class for storing all moves made.
+     * 用于存储所有移动的帮助类，即移动日志
      */
     static class MoveLog {
 
@@ -576,7 +655,7 @@ public class Table extends BorderPane {
     }
 
     /**
-     * A pane for displaying the game board.
+     * 显示游戏棋盘的面板
      */
     private class BoardPane extends GridPane {
 
@@ -823,7 +902,7 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Helper class for player communication involving AI.
+     * AI玩家帮助类
      */
     private static class AIObserver implements PropertyChangeListener {
 
@@ -882,12 +961,14 @@ public class Table extends BorderPane {
         }
 
         /**
-         * Terminates all running AI (if any).
+         * 终止所有正在运行的AI(如果有)
          */
         private void stopAI() {
+            // 取消任务
             if (task != null) {
                 task.cancel();
             }
+            // 暂停且取消全部AI玩家及其计时器任务
             while (!aiPlayers.isEmpty()) {
                 AIPlayer aiPlayer = aiPlayers.pop();
                 aiPlayer.stop();
@@ -953,12 +1034,14 @@ public class Table extends BorderPane {
         }
 
         /**
-         * Stops this AI player and its timer task.
+         * 暂停且取消全部AI玩家及其计时器任务
          */
         private void stop() {
+            // 取消任务
             if (task != null) {
                 task.cancel();
             }
+            // 标记为可以停止运行
             cancel(true);
         }
     }

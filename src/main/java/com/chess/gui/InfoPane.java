@@ -26,7 +26,7 @@ import java.util.Optional;
 import static com.chess.gui.Table.*;
 
 /**
- * A pane for displaying captured pieces on both alliances as well as the current status of the game.
+ * 显示双方获子及当前游戏状态的面板，即游戏信息面板
  */
 class InfoPane extends BorderPane {
 

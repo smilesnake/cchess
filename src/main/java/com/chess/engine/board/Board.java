@@ -24,7 +24,7 @@ import java.util.Random;
 import static com.chess.engine.pieces.Piece.*;
 
 /**
- * Represents a Chinese Chess board.
+ * ÖÐ¹úÏóÆåÆåÅÌ
  */
 public class Board {
 

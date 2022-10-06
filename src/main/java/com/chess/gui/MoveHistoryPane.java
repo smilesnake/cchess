@@ -25,7 +25,7 @@ import static com.chess.gui.Table.*;
 import static javafx.scene.control.Alert.*;
 
 /**
- * A pane for displaying the move history of the game.
+ * 显示游戏的移动历史的面板
  */
 class MoveHistoryPane extends BorderPane {
 
@@ -52,11 +52,11 @@ class MoveHistoryPane extends BorderPane {
         TableColumn<Turn, String> redMoveCol = new TableColumn<>("RED");
         redMoveCol.setCellValueFactory(new PropertyValueFactory<>("redMove"));
         redMoveCol.setSortable(false);
-        redMoveCol.setReorderable(false);
+//        redMoveCol.setReorderable(false);
         TableColumn<Turn, String> blackMoveCol = new TableColumn<>("BLACK");
         blackMoveCol.setCellValueFactory(new PropertyValueFactory<>("blackMove"));
         blackMoveCol.setSortable(false);
-        blackMoveCol.setReorderable(false);
+//        blackMoveCol.setReorderable(false);
 
         turnTableView.getColumns().setAll(redMoveCol, blackMoveCol);
         turnTableView.getSelectionModel().setCellSelectionEnabled(true);
