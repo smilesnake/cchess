@@ -13,8 +13,14 @@ import java.util.Objects;
  */
 public abstract class Piece {
 
+    /**
+     * 所属阵营（红方或黑方）
+     */
     protected final Alliance alliance;
     protected final Coordinate position;
+    /**
+     * 棋子类型，如車、炮等
+     */
     private final PieceType pieceType;
     private final int hashCode;
 
@@ -26,10 +32,10 @@ public abstract class Piece {
     }
 
     /**
-     * Returns a collection of legal moves that can be made by this piece on the given board.
+     * 返回当前棋子在给定棋盘上可以采取的合法走法的集合
      *
-     * @param board The current board.
-     * @return a collection of legal moves that can be made by this piece on the given board.
+     * @param board 当前棋盘
+     * @return 当前棋子在给定棋盘上可以采取的合法走法的集合.
      */
     public abstract Collection<Move> getLegalMoves(Board board);
 
@@ -45,10 +51,10 @@ public abstract class Piece {
     public abstract Collection<Move> getLegalMoves(Board board, Collection<Attack> attacks, Collection<Defense> defenses);
 
     /**
-     * Moves this piece based on the given move and returns the new piece.
+     * 根据给定的棋子落子对象落子并返回落子后的棋子对象
      *
-     * @param move The move made on this piece.
-     * @return The new piece after the move is made.
+     * @param move 棋子落子对象
+     * @return 落子后的棋子对象
      */
     public abstract Piece movePiece(Move move);
 

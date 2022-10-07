@@ -6,13 +6,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
-import javafx.scene.control.TableView;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,28 +15,48 @@ import javafx.scene.layout.GridPane;
 
 import java.util.ArrayList;
 
-import static com.chess.gui.Table.*;
-import static javafx.scene.control.Alert.*;
+import static com.chess.gui.Table.MoveLog;
+import static javafx.scene.control.Alert.AlertType;
 
 /**
- * ��ʾ��Ϸ���ƶ���ʷ�����
+ * 显示游戏的移动历史的面板
  */
 class MoveHistoryPane extends BorderPane {
 
+    /**
+     * 历史面板宽度
+     */
     private static final int HISTORY_PANE_WIDTH = 120;
+    /**
+     * 历史面板高度
+     */
     private static final int HISTORY_PANE_HEIGHT = 600;
-    private static final Label EMPTY_TABLE_MESSAGE = new Label("No moves made");
-    private static final Image PREV_MOVE =
-            new Image(MoveHistoryPane.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "prev.png"));
-    private static final Image NEXT_MOVE =
-            new Image(MoveHistoryPane.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "next.png"));
-    private static final Image START_MOVE =
-            new Image(MoveHistoryPane.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "start.png"));
-    private static final Image END_MOVE =
-            new Image(MoveHistoryPane.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "end.png"));
+    /**
+     * 空表格消息
+     */
+    private static final Label EMPTY_TABLE_MESSAGE = new Label("没有移动记录");
+    /**
+     * 上一步
+     */
+    private static final Image PREV_MOVE = new Image(MoveHistoryPane.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "prev.png"));
+    /**
+     * 下一步
+     */
+    private static final Image NEXT_MOVE = new Image(MoveHistoryPane.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "next.png"));
+    /**
+     * 第一步
+     */
+    private static final Image START_MOVE = new Image(MoveHistoryPane.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "start.png"));
+    /**
+     * 最后一步
+     */
+    private static final Image END_MOVE = new Image(MoveHistoryPane.class.getResourceAsStream(GuiUtil.GRAPHICS_MISC_PATH + "end.png"));
 
     private final ReplayPane replayPane;
     private final TableView<Turn> turnTableView;
+    /**
+     * 回合列表
+     */
     private final ObservableList<Turn> turnList;
 
     MoveHistoryPane() {
@@ -78,7 +92,7 @@ class MoveHistoryPane extends BorderPane {
                 replayPane.toggleReplay.fire();
             }
             TablePosition tablePosition = selectedCells.get(0);
-            int moveIndex = tablePosition.getRow()*2 + tablePosition.getColumn();
+            int moveIndex = tablePosition.getRow() * 2 + tablePosition.getColumn();
             Table.getInstance().jumpToMove(moveIndex);
         });
 
@@ -88,11 +102,14 @@ class MoveHistoryPane extends BorderPane {
     }
 
     /**
-     * Updates this move history pane based on the given movelog.
-     * @param movelog The current movelog.
+     * 根据给定的移动日志更新此移动历史面板
+     *
+     * @param movelog 给定的移动日志.
      */
     void update(MoveLog movelog) {
+        // 清空回合列表
         turnList.clear();
+        // 没有落子记录设置占位符消息
         if (movelog.isEmpty()) {
             turnTableView.setPlaceholder(EMPTY_TABLE_MESSAGE);
             return;
@@ -100,30 +117,48 @@ class MoveHistoryPane extends BorderPane {
 
         Turn currTurn = new Turn();
         for (Move move : movelog.getMoves()) {
+            // 红方，说明又是新的回合
             if (move.getMovedPiece().getAlliance().isRed()) {
                 currTurn = new Turn();
+                // 设置红方移动
                 currTurn.setRedMove(move.toString());
                 turnList.add(currTurn);
             } else {
+                // 设置黑方移动
                 currTurn.setBlackMove(move.toString());
             }
         }
-
+        // 滚动至指定位置
         turnTableView.scrollTo(turnList.size() - 1);
     }
 
     /**
-     * A pane for navigating replays.
+     * 用于回放/重播的面板。
      */
     private class ReplayPane extends GridPane {
+        /**
+         * 回放/重播按钮
+         */
         private final ToggleButton toggleReplay;
+        /**
+         * 上一步按钮
+         */
         private final Button prevMove;
+        /**
+         * 下一步按钮
+         */
         private final Button nextMove;
+        /**
+         * 第一步按钮
+         */
         private final Button startMove;
+        /**
+         * 最后一步按钮
+         */
         private final Button endMove;
 
         private ReplayPane() {
-            toggleReplay = new ToggleButton("REPLAY");
+            toggleReplay = new ToggleButton("回放/重播");
             toggleReplay.setOnAction(e -> {
                 if (toggleReplay.isSelected()) {
                     if (!turnList.isEmpty()) {
@@ -168,8 +203,7 @@ class MoveHistoryPane extends BorderPane {
                 Turn currTurn = turnList.get(tablePosition.getRow());
                 if (tablePosition.getTableColumn().equals(redMoveCol) && currTurn.getBlackMove() != null) {
                     turnTableView.getSelectionModel().clearAndSelect(tablePosition.getRow(), blackMoveCol);
-                } else if (tablePosition.getTableColumn().equals(blackMoveCol)
-                        && tablePosition.getRow() < turnList.size() - 1) {
+                } else if (tablePosition.getTableColumn().equals(blackMoveCol) && tablePosition.getRow() < turnList.size() - 1) {
                     turnTableView.getSelectionModel().clearAndSelect(tablePosition.getRow() + 1, redMoveCol);
                 }
                 turnTableView.scrollTo(turnTableView.getSelectionModel().getSelectedIndex());
@@ -222,37 +256,69 @@ class MoveHistoryPane extends BorderPane {
     }
 
     /**
-     * Checks if the game is in replay mode.
-     * @return true if the game is in replay mode, false otherwise.
+     * 检查游戏是否处于回放/重播模式
+     *
+     * @return true, 当前处于回放/重播模式，否则，false
      */
     boolean isInReplayMode() {
         return replayPane.toggleReplay.isSelected();
     }
 
     /**
-     * Represents a pair of consecutive RED and BLACK player moves.
+     * 回合类，表示一对连续的红黑棋手移动
      */
     public static class Turn {
 
+        /**
+         * 红方移动
+         */
         private StringProperty redMove;
+        /**
+         * 黑方移动
+         */
         private StringProperty blackMove;
 
+        /**
+         * 获取红方移动字符
+         *
+         * @return 红方移动字符
+         */
         public String getRedMove() {
             return redMoveProperty().get();
         }
 
+        /**
+         * 获取黑方移动字符
+         *
+         * @return 黑方移动字符
+         */
         public String getBlackMove() {
             return blackMoveProperty().get();
         }
 
+        /**
+         * 设置红方移动字符
+         *
+         * @param move 红方移动字符
+         */
         private void setRedMove(String move) {
             redMoveProperty().set(move);
         }
 
+        /**
+         * 设置黑方移动字符
+         *
+         * @param move 黑方移动字符
+         */
         private void setBlackMove(String move) {
             blackMoveProperty().set(move);
         }
 
+        /**
+         * 红方移动属性
+         *
+         * @return 字符串属性
+         */
         private StringProperty redMoveProperty() {
             if (redMove == null) {
                 redMove = new SimpleStringProperty(this, "redMove");
@@ -260,6 +326,11 @@ class MoveHistoryPane extends BorderPane {
             return redMove;
         }
 
+        /**
+         * 黑方移动属性
+         *
+         * @return 字符串属性
+         */
         private StringProperty blackMoveProperty() {
             if (blackMove == null) {
                 blackMove = new SimpleStringProperty(this, "blackMove");

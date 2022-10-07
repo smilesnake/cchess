@@ -9,11 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -21,20 +17,33 @@ import javafx.scene.text.FontWeight;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static com.chess.gui.Table.*;
 
 /**
- * ��ʾ˫�����Ӽ���ǰ��Ϸ״̬����壬����Ϸ��Ϣ���
+ * 显示双方获子及当前游戏状态的面板，即游戏信息面板
  */
 class InfoPane extends BorderPane {
 
+    /**
+     * 游戏信息面板宽度
+     */
     private static final int INFO_PANE_WIDTH = 120;
+    /**
+     * 游戏信息面板高度
+     */
     private static final int INFO_PANE_HEIGHT = 600;
-
+    /**
+     * 红方吃子面板
+     */
     private final CapturedPane redCapturedPane;
+    /**
+     * 黑方吃子面板
+     */
     private final CapturedPane blackCapturedPane;
+    /**
+     * 当前游戏状态面板
+     */
     private final StatusPane statusPane;
 
     InfoPane() {
@@ -52,9 +61,10 @@ class InfoPane extends BorderPane {
     }
 
     /**
-     * Updates the status and captured panes based on the given board and movelog.
-     * @param board The current board.
-     * @param movelog The current movelog.
+     * 基于给定的棋盘和移动日志更新状态和显示吃子的面板。
+     *
+     * @param board   当前面板.
+     * @param movelog 当前移动日志.
      */
     void update(Board board, MoveLog movelog) {
         redCapturedPane.update(movelog);
@@ -63,17 +73,33 @@ class InfoPane extends BorderPane {
     }
 
     /**
-     * A pane for displaying captured pieces for an alliance.
+     * 一个显示双方吃子的面板
      */
     private static class CapturedPane extends GridPane {
 
+        /**
+         * 面板高度
+         */
         private static final int CAPTURED_PANE_HEIGHT = 250;
+        /**
+         * 吃子面板颜色
+         */
         private static final Color CAPTURED_PANE_COLOR = Color.LIGHTGRAY;
-        private static final Background CAPTURED_PANE_BACKGROUND =
-                new Background(new BackgroundFill(CAPTURED_PANE_COLOR, CornerRadii.EMPTY, Insets.EMPTY));
+        /**
+         * 吃子面板背景颜色
+         */
+        private static final Background CAPTURED_PANE_BACKGROUND = new Background(new BackgroundFill(CAPTURED_PANE_COLOR, CornerRadii.EMPTY, Insets.EMPTY));
 
+        /**
+         * 所属阵营（红方或黑方）
+         */
         private final Alliance alliance;
 
+        /**
+         * 构造
+         *
+         * @param alliance 所属阵营（红方或黑方）
+         */
         private CapturedPane(Alliance alliance) {
             this.alliance = alliance;
             setBackground(CAPTURED_PANE_BACKGROUND);
@@ -81,52 +107,51 @@ class InfoPane extends BorderPane {
         }
 
         /**
-         * Updates this captured pane based on the given movelog.
+         * 根据给定的移动日志更新吃子的面板
          */
         private void update(MoveLog movelog) {
             getChildren().clear();
             List<Piece> capturedPieces = new ArrayList<>();
 
-            for (Move move : movelog.getMoves()) {
-                Optional<Piece> capturedPiece = move.getCapturedPiece();
-                capturedPiece.ifPresent(p -> {
-                    if (p.getAlliance().equals(alliance)) {
-                        capturedPieces.add(p);
-                    }
-                });
-            }
+            // 添加被吃的棋子
+            movelog.getMoves().stream().map(Move::getCapturedPiece).forEach(capturedPiece -> capturedPiece.ifPresent(p -> {
+                if (p.getAlliance().equals(alliance)) {
+                    capturedPieces.add(p);
+                }
+            }));
 
-            Comparator<Piece> comparator = Comparator.comparing(Piece::getPieceType);
-            capturedPieces.sort(comparator);
+            // 按棋子类型排序
+            capturedPieces.sort(Comparator.comparing(Piece::getPieceType));
 
             for (int i = 0; i < capturedPieces.size(); i++) {
                 Piece piece = capturedPieces.get(i);
-                String name = (piece.getAlliance().toString().substring(0, 1)
-                        + piece.getPieceType().toString()).toLowerCase();
+                // 名称
+                String name = (piece.getAlliance().toString().substring(0, 1) + piece.getPieceType().toString()).toLowerCase();
+                // 所属图片
                 Image image = PIECE_IMAGE_MAP.get(name);
                 ImageView imageView = new ImageView(image);
                 imageView.setFitWidth(image.getWidth() / 2);
                 imageView.setFitHeight(image.getHeight() / 2);
 
+                // 棋子组件
                 Label label = new Label();
                 label.setGraphic(imageView);
                 label.setPrefSize(INFO_PANE_WIDTH / 2, CAPTURED_PANE_HEIGHT / 8);
                 label.setAlignment(Pos.CENTER);
+                // 加入棋子
                 add(label, i % 2, i / 2);
             }
         }
     }
 
     /**
-     * A pane for displaying the current status of the game.
+     * 显示游戏当前状态的面板
      */
     private static class StatusPane extends GridPane {
 
         private static final int STATUS_PANE_HEIGHT = 100;
-        private static final Font TOP_FONT =
-                Font.font("System", FontWeight.MEDIUM, Font.getDefault().getSize() + 2);
-        private static final Font BOTTOM_FONT =
-                Font.font("System", FontWeight.BOLD, Font.getDefault().getSize() + 4);
+        private static final Font TOP_FONT = Font.font("System", FontWeight.MEDIUM, Font.getDefault().getSize() + 2);
+        private static final Font BOTTOM_FONT = Font.font("System", FontWeight.BOLD, Font.getDefault().getSize() + 4);
         private static final Label CHECK_LABEL = getCheckLabel();
         private static final Label CHECKMATE_LABEL = getCheckmateLabel();
         private static final Label DRAW_LABEL = getDrawLabel();
@@ -178,8 +203,7 @@ class InfoPane extends BorderPane {
             getChildren().clear();
 
             if (board.isCurrPlayerCheckmated()) {
-                Label gameOverLabel =
-                        new Label(board.getOppPlayer().getAlliance().toString() + " wins");
+                Label gameOverLabel = new Label(board.getOppPlayer().getAlliance().toString() + " wins");
                 gameOverLabel.setFont(TOP_FONT);
                 gameOverLabel.setAlignment(Pos.CENTER);
                 gameOverLabel.setPrefSize(INFO_PANE_WIDTH, STATUS_PANE_HEIGHT / 2);
@@ -209,6 +233,7 @@ class InfoPane extends BorderPane {
 
     /**
      * Sets the direction of the captured panes based on the given board direction.
+     *
      * @param direction The current board direction.
      */
     void setDirection(BoardDirection direction) {

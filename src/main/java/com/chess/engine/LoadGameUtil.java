@@ -12,12 +12,21 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A helper class for loading a saved game.
+ * 用于加载已保存游戏的帮助类
  */
 public class LoadGameUtil {
 
+    /**
+     * 中国象棋棋盘
+     */
     private Board board;
+    /**
+     * 移动列表
+     */
     private List<Move> moves;
+    /**
+     * 是否有效的，true,有效的，false，无效的
+     */
     private boolean isValid;
 
     public LoadGameUtil(File file) {

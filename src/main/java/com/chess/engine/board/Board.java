@@ -1,30 +1,15 @@
 package com.chess.engine.board;
 
 import com.chess.engine.Alliance;
-import com.chess.engine.pieces.Advisor;
-import com.chess.engine.pieces.Cannon;
-import com.chess.engine.pieces.Chariot;
-import com.chess.engine.pieces.Elephant;
-import com.chess.engine.pieces.General;
-import com.chess.engine.pieces.Horse;
-import com.chess.engine.pieces.Piece;
-import com.chess.engine.pieces.Soldier;
+import com.chess.engine.pieces.*;
 import com.chess.engine.player.Player;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 import static com.chess.engine.pieces.Piece.*;
 
 /**
- * �й���������
+ * 中国象棋棋盘
  */
 public class Board {
 
@@ -38,6 +23,9 @@ public class Board {
     private final List<PlayerInfo> playerInfoHistory;
     private PlayerInfo playerInfo;
     private Alliance currTurn;
+    /**
+     * Zobrist键值
+     */
     private long zobristKey;
 
     private Board(Builder builder) {
@@ -72,39 +60,9 @@ public class Board {
     public static Board initialiseBoard() {
         Builder builder = new Builder();
 
-        builder.putPiece(new Chariot(new Coordinate(0, 0), Alliance.BLACK))
-                .putPiece(new Horse(new Coordinate(0, 1), Alliance.BLACK))
-                .putPiece(new Elephant(new Coordinate(0, 2), Alliance.BLACK))
-                .putPiece(new Advisor(new Coordinate(0, 3), Alliance.BLACK))
-                .putPiece(new General(new Coordinate(0, 4), Alliance.BLACK))
-                .putPiece(new Advisor(new Coordinate(0, 5), Alliance.BLACK))
-                .putPiece(new Elephant(new Coordinate(0, 6), Alliance.BLACK))
-                .putPiece(new Horse(new Coordinate(0, 7), Alliance.BLACK))
-                .putPiece(new Chariot(new Coordinate(0, 8), Alliance.BLACK))
-                .putPiece(new Cannon(new Coordinate(2, 1), Alliance.BLACK))
-                .putPiece(new Cannon(new Coordinate(2, 7), Alliance.BLACK))
-                .putPiece(new Soldier(new Coordinate(3, 0), Alliance.BLACK))
-                .putPiece(new Soldier(new Coordinate(3, 2), Alliance.BLACK))
-                .putPiece(new Soldier(new Coordinate(3, 4), Alliance.BLACK))
-                .putPiece(new Soldier(new Coordinate(3, 6), Alliance.BLACK))
-                .putPiece(new Soldier(new Coordinate(3, 8), Alliance.BLACK));
+        builder.putPiece(new Chariot(new Coordinate(0, 0), Alliance.BLACK)).putPiece(new Horse(new Coordinate(0, 1), Alliance.BLACK)).putPiece(new Elephant(new Coordinate(0, 2), Alliance.BLACK)).putPiece(new Advisor(new Coordinate(0, 3), Alliance.BLACK)).putPiece(new General(new Coordinate(0, 4), Alliance.BLACK)).putPiece(new Advisor(new Coordinate(0, 5), Alliance.BLACK)).putPiece(new Elephant(new Coordinate(0, 6), Alliance.BLACK)).putPiece(new Horse(new Coordinate(0, 7), Alliance.BLACK)).putPiece(new Chariot(new Coordinate(0, 8), Alliance.BLACK)).putPiece(new Cannon(new Coordinate(2, 1), Alliance.BLACK)).putPiece(new Cannon(new Coordinate(2, 7), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 0), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 2), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 4), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 6), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 8), Alliance.BLACK));
 
-        builder.putPiece(new Chariot(new Coordinate(9, 0), Alliance.RED))
-                .putPiece(new Horse(new Coordinate(9, 1), Alliance.RED))
-                .putPiece(new Elephant(new Coordinate(9, 2), Alliance.RED))
-                .putPiece(new Advisor(new Coordinate(9, 3), Alliance.RED))
-                .putPiece(new General(new Coordinate(9, 4), Alliance.RED))
-                .putPiece(new Advisor(new Coordinate(9, 5), Alliance.RED))
-                .putPiece(new Elephant(new Coordinate(9, 6), Alliance.RED))
-                .putPiece(new Horse(new Coordinate(9, 7), Alliance.RED))
-                .putPiece(new Chariot(new Coordinate(9, 8), Alliance.RED))
-                .putPiece(new Cannon(new Coordinate(7, 1), Alliance.RED))
-                .putPiece(new Cannon(new Coordinate(7, 7), Alliance.RED))
-                .putPiece(new Soldier(new Coordinate(6, 0), Alliance.RED))
-                .putPiece(new Soldier(new Coordinate(6, 2), Alliance.RED))
-                .putPiece(new Soldier(new Coordinate(6, 4), Alliance.RED))
-                .putPiece(new Soldier(new Coordinate(6, 6), Alliance.RED))
-                .putPiece(new Soldier(new Coordinate(6, 8), Alliance.RED));
+        builder.putPiece(new Chariot(new Coordinate(9, 0), Alliance.RED)).putPiece(new Horse(new Coordinate(9, 1), Alliance.RED)).putPiece(new Elephant(new Coordinate(9, 2), Alliance.RED)).putPiece(new Advisor(new Coordinate(9, 3), Alliance.RED)).putPiece(new General(new Coordinate(9, 4), Alliance.RED)).putPiece(new Advisor(new Coordinate(9, 5), Alliance.RED)).putPiece(new Elephant(new Coordinate(9, 6), Alliance.RED)).putPiece(new Horse(new Coordinate(9, 7), Alliance.RED)).putPiece(new Chariot(new Coordinate(9, 8), Alliance.RED)).putPiece(new Cannon(new Coordinate(7, 1), Alliance.RED)).putPiece(new Cannon(new Coordinate(7, 7), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 0), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 2), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 4), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 6), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 8), Alliance.RED));
 
         builder.setCurrTurn(Alliance.RED);
 
@@ -145,15 +103,13 @@ public class Board {
             }
         }
 
-        Player redPlayer = new Player(Alliance.RED, redPieces, redLegalMoves, blackLegalMoves,
-                redMobilityValue, redAttacks, redDefenses);
-        Player blackPlayer = new Player(Alliance.BLACK, blackPieces, blackLegalMoves, redLegalMoves,
-                blackMobilityValue, blackAttacks, blackDefenses);
+        Player redPlayer = new Player(Alliance.RED, redPieces, redLegalMoves, blackLegalMoves, redMobilityValue, redAttacks, redDefenses);
+        Player blackPlayer = new Player(Alliance.BLACK, blackPieces, blackLegalMoves, redLegalMoves, blackMobilityValue, blackAttacks, blackDefenses);
         return new PlayerInfo(redPlayer, blackPlayer);
     }
 
     /**
-     * Updates information related to both players on this board from existing information.
+     * 从现有信息中更新与此棋盘上双方玩家相关的信息
      */
     private PlayerInfo updatePlayerInfo(Move move) {
         Piece movedPiece = move.getMovedPiece();
@@ -201,57 +157,75 @@ public class Board {
             blackMobilityValue += destPiece.getPieceType().getMobilityValue() * moves.size();
         }
 
-        redPlayer = new Player(Alliance.RED, redPieces, redLegalMoves, blackLegalMoves,
-                redMobilityValue, redAttacks, redDefenses);
-        blackPlayer = new Player(Alliance.BLACK, blackPieces, blackLegalMoves, redLegalMoves,
-                blackMobilityValue, blackAttacks, blackDefenses);
+        redPlayer = new Player(Alliance.RED, redPieces, redLegalMoves, blackLegalMoves, redMobilityValue, redAttacks, redDefenses);
+        blackPlayer = new Player(Alliance.BLACK, blackPieces, blackLegalMoves, redLegalMoves, blackMobilityValue, blackAttacks, blackDefenses);
         return new PlayerInfo(redPlayer, blackPlayer);
     }
 
     /**
-     * Makes the given move on this board. Player information and Zobrist key are updated.
-     * @param move The move to be made.
+     * 在这个棋盘上做出给定的移动，玩家信息和Zobrist键值更新
+     *
+     * @param move 要走的一步
      */
     public void makeMove(Move move) {
+        // 移动的棋子
         Piece movedPiece = move.getMovedPiece();
+        // 当前位置
         Coordinate srcPosition = movedPiece.getPosition();
+        // 目录位置
         Coordinate destPosition = move.getDestPosition();
 
         Point srcPoint = points.get(BoardUtil.positionToIndex(srcPosition));
+        // 源位置移除棋子
         srcPoint.removePiece();
         Point destPoint = points.get(BoardUtil.positionToIndex(destPosition));
+        // 目标位置添加落子后的棋子对象
         destPoint.setPiece(movedPiece.movePiece(move));
 
+        // 添加玩家信息
         playerInfoHistory.add(playerInfo);
+        // 更新玩家信息
         playerInfo = updatePlayerInfo(move);
+        // 变更当前落子对象
         changeTurn();
+        // 更新Zobrist键值
         zobristKey = ZOBRIST.updateKey(zobristKey, move);
     }
 
     /**
-     * Undoes the given move on this board. Player information and Zobrist key are updated.
-     * @param move The move to be undone.
+     * 撤销棋盘上的给定走法。玩家信息和Zobrist键被更新。
+     *
+     * @param move 被撤销的动作.
      */
     public void unmakeMove(Move move) {
+        // 移动的棋子
         Piece movedPiece = move.getMovedPiece();
+        // 被吃的棋子
         Optional<Piece> capturedPiece = move.getCapturedPiece();
+        // 当前位置
         Coordinate srcPosition = movedPiece.getPosition();
+        // 目录位置
         Coordinate destPosition = move.getDestPosition();
 
         Point srcPoint = points.get(BoardUtil.positionToIndex(srcPosition));
+        // 源位置还原移动的棋子
         srcPoint.setPiece(movedPiece);
         Point destPoint = points.get(BoardUtil.positionToIndex(destPosition));
+        // 目标位置移除棋子
         destPoint.removePiece();
+        // 被吃棋子存在则复原
         capturedPiece.ifPresent(destPoint::setPiece);
 
-        playerInfo = playerInfoHistory.isEmpty() ? generatePlayerInfo()
-                : playerInfoHistory.remove(playerInfoHistory.size() - 1);
+        // 更新玩家信息
+        playerInfo = playerInfoHistory.isEmpty() ? generatePlayerInfo() : playerInfoHistory.remove(playerInfoHistory.size() - 1);
+        // 变更当前落子对象
         changeTurn();
+        // 更新Zobrist键值
         zobristKey = ZOBRIST.updateKey(zobristKey, move);
     }
 
     /**
-     * Switches the current turn on the board. Zobrist key is updated.
+     * 转变当前回合所属对象（变更当前落子对象）。Zobrist键已更新
      */
     public void changeTurn() {
         currTurn = currTurn.opposite();
@@ -260,14 +234,14 @@ public class Board {
 
     /**
      * Returns a move, if any, corresponding to the given source and destination positions on this board.
-     * @param srcPosition The source position.
+     *
+     * @param srcPosition  The source position.
      * @param destPosition The destination position.
      * @return A move, if any, corresponding to the given source and destination positions on this board.
      */
     public Optional<Move> getMove(Coordinate srcPosition, Coordinate destPosition) {
         for (Move move : getCurrPlayer().getLegalMoves()) {
-            if (move.getMovedPiece().getPosition().equals(srcPosition)
-                    && move.getDestPosition().equals(destPosition)) {
+            if (move.getMovedPiece().getPosition().equals(srcPosition) && move.getDestPosition().equals(destPosition)) {
                 return Optional.of(move);
             }
         }
@@ -276,6 +250,7 @@ public class Board {
 
     /**
      * Checks if the current player's opponent is in check. Such a state is not allowed.
+     *
      * @return true if the current player's opponent is NOT in check, false otherwise.
      */
     public boolean isStateAllowed() {
@@ -284,6 +259,7 @@ public class Board {
 
     /**
      * Checks if the current player has been checkmated.
+     *
      * @return true if the current player has been checkmated, false otherwise.
      */
     public boolean isCurrPlayerCheckmated() {
@@ -303,6 +279,7 @@ public class Board {
 
     /**
      * Checks if the game on this board is a draw.
+     *
      * @return true if the game is a draw, false otherwise.
      */
     public boolean isGameDraw() {
@@ -321,6 +298,7 @@ public class Board {
 
     /**
      * Checks if the current player has no capture moves.
+     *
      * @return true if the current player has no capture moves, false otherwise.
      */
     public boolean isQuiet() {
@@ -334,6 +312,7 @@ public class Board {
 
     /**
      * Returns a copy of this board.
+     *
      * @return A copy of this board.
      */
     public Board getCopy() {
@@ -350,6 +329,7 @@ public class Board {
 
     /**
      * Returns a mirrored copy (about the middle column) of this board.
+     *
      * @return A mirrored copy of this board.
      */
     public Board getMirrorBoard() {
@@ -366,6 +346,7 @@ public class Board {
 
     /**
      * Checks if the current player has given a check for three consecutive times.
+     *
      * @return true if the current player has given a check for three consecutive times, false otherwise.
      */
     public boolean lastThreeChecks() {
@@ -374,11 +355,11 @@ public class Board {
         }
         for (int i = 0; i < 3; i++) {
             if (currTurn.isRed()) {
-                if (!playerInfoHistory.get(playerInfoHistory.size() - 1 - i*2).blackPlayer.isInCheck()) {
+                if (!playerInfoHistory.get(playerInfoHistory.size() - 1 - i * 2).blackPlayer.isInCheck()) {
                     return false;
                 }
             } else {
-                if (!playerInfoHistory.get(playerInfoHistory.size() - 1 - i*2).redPlayer.isInCheck()) {
+                if (!playerInfoHistory.get(playerInfoHistory.size() - 1 - i * 2).redPlayer.isInCheck()) {
                     return false;
                 }
             }
@@ -388,6 +369,7 @@ public class Board {
 
     /**
      * Returns the advisor structure of the player with the given alliance.
+     *
      * @param alliance The alliance of the player to check.
      * @return The advisor structure of the player with the given alliance.
      */

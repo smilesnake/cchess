@@ -423,29 +423,38 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Loads a text file to restore a previously saved game.
+     * 加载一个文本文件来恢复之前保存的游戏
      */
     private void loadGame() {
         FileChooser fc = new FileChooser();
-        fc.setTitle("Load");
+        fc.setTitle("加载");
         File file = fc.showOpenDialog(CChess.stage);
 
         if (file != null) {
             LoadGameUtil lgu = new LoadGameUtil(file);
+            // 非有效的文件，弹窗提示
             if (!lgu.isValidFile()) {
-                // 弹窗提示
-                showAlert(AlertType.ERROR, "Load", "Invalid file");
+                showAlert(AlertType.ERROR, "加载", "无效的文件");
             } else {
+                // 清除所有鼠标选择
                 clearSelections();
+                // 终止所有正在运行的AI
                 aiObserver.stopAI();
+                // 退出回放/重播模式
                 exitReplayMode();
 
+                // 初始化棋盘
                 board = lgu.getBoard();
+
+                // 清空所有历史移动日志，添加新的移动日志
                 fullMovelog.clear();
                 for (Move move : lgu.getMoves()) {
                     fullMovelog.addMove(move);
                 }
+
+                // 更新移动历史面板
                 moveHistoryPane.update(fullMovelog);
+                // 更新信息面板
                 infoPane.update(board, fullMovelog);
                 boardPane.drawBoard(board);
 
@@ -559,7 +568,7 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Clears all mouse selections made by the human player.
+     * 清除所有鼠标选择
      */
     private void clearSelections() {
         sourcePoint = null;
@@ -605,42 +614,79 @@ public class Table extends BorderPane {
      */
     static class MoveLog {
 
+        /**
+         * 移动记录列表
+         */
         private final List<Move> moves;
 
+        /**
+         * 构造
+         */
         private MoveLog() {
             this.moves = new ArrayList<>();
         }
 
+        /**
+         * 获取移动记录列表
+         *
+         * @return 移动记录列表
+         */
         List<Move> getMoves() {
             return moves;
         }
 
+        /**
+         * 移动步数，即移动记录列表大小
+         *
+         * @return 移动步数，即移动记录列表大小
+         */
         int getSize() {
             return moves.size();
         }
 
+        /**
+         * 有无移动记录
+         *
+         * @return true, 有移动记录，否则，false
+         */
         boolean isEmpty() {
             return moves.isEmpty();
         }
 
+        /**
+         * 添加移动记录
+         *
+         * @param move 移动记录
+         */
         void addMove(Move move) {
             moves.add(move);
         }
 
+        /**
+         * 移除最后的移动
+         */
         void removeLastMove() {
-            if (!moves.isEmpty()) {
-                moves.remove(moves.size() - 1);
+            if (moves.isEmpty()) {
+                return;
             }
+            moves.remove(moves.size() - 1);
         }
 
+        /**
+         * 获取最后的移动记录，即最后一步
+         *
+         * @return 最后的移动记录，即最后一步
+         */
         Move getLastMove() {
-            if (!moves.isEmpty()) {
-                return moves.get(moves.size() - 1);
-            }
-
-            return null;
+            return moves.isEmpty() ? null : moves.get(moves.size() - 1);
         }
 
+        /**
+         * 获取部分的移动记录
+         *
+         * @param moveIndex 指定的移动下标
+         * @return 获取指定移动下标（包含）前的移动记录
+         */
         MoveLog getPartialLog(int moveIndex) {
             MoveLog partialLog = new MoveLog();
             for (int i = 0; i < moveIndex + 1; i++) {
@@ -649,6 +695,9 @@ public class Table extends BorderPane {
             return partialLog;
         }
 
+        /**
+         * 清空移动历史
+         */
         void clear() {
             moves.clear();
         }
@@ -683,14 +732,15 @@ public class Table extends BorderPane {
         }
 
         /**
-         * Redraws this board pane given the board.
+         * 根据给定的棋盘重绘此棋盘面板
          *
-         * @param board The current board.
+         * @param board 当前棋盘.
          */
         private void drawBoard(Board board) {
             getChildren().clear();
-
+            // 遍历点位
             for (PointPane pointPane : pointPanes) {
+                // 绘制点位
                 pointPane.drawPoint(board);
                 if (boardDirection.isNormal()) {
                     add(pointPane, pointPane.position.getCol(), pointPane.position.getRow());
@@ -805,26 +855,32 @@ public class Table extends BorderPane {
         }
 
         /**
-         * Redraws this point pane given the board.
+         * 根据棋盘重绘此点窗格
          *
-         * @param board The current board.
+         * @param board 当前棋盘.
          */
         private void drawPoint(Board board) {
+            // 给给定点上面的棋子分配图片
             assignPointPieceIcon(board);
+            // 高亮最后移动和选中的棋子
             highlightLastMoveAndSelectedPiece();
+            // 高亮可能移动
             highlightPossibleMoves(board);
         }
 
         /**
-         * Assigns an image to this point pane given the current piece (if any) on it.
+         * 给定点上的当前棋子(如果有)，将图片分配给该点
          *
-         * @param board The current board.
+         * @param board 当前棋盘
          */
         private void assignPointPieceIcon(Board board) {
             getChildren().clear();
 
+            // 指定位置在棋盘上的点位
             Point point = board.getPoint(position);
+            // 点位上的棋子
             Optional<Piece> destPiece = point.getPiece();
+            // 存在柜子，分配图片并添加进子组件
             destPiece.ifPresent(p -> {
                 String name = (p.getAlliance().toString().substring(0, 1) + p.getPieceType().toString()).toLowerCase();
                 Label label = new Label();
@@ -834,54 +890,66 @@ public class Table extends BorderPane {
         }
 
         /**
-         * Highlights (using a border) this point pane if it contains the selected piece OR it was part of the previous move.
+         * 如果包含选中的棋子或它是上一次移动的部分，高亮显示(使用边框)这个点
          */
         private void highlightLastMoveAndSelectedPiece() {
+            // 最后的移动
             Move lastMove;
+            // 当前处于回放/重播模式
             if (moveHistoryPane.isInReplayMode()) {
                 lastMove = partialMovelog.getLastMove();
-            } else {
+            } else { // 非回放/重播模式
                 lastMove = fullMovelog.getLastMove();
             }
 
+            // 存在最后的行棋
             if (lastMove != null) {
                 Piece lastMovedPiece = lastMove.getMovedPiece();
+                // 棋子当前点位设置虚线边框
                 if (lastMovedPiece.getPosition().equals(position)) {
                     setBorder(HIGHLIGHT_LAST_MOVE_BORDER);
                     return;
                 }
+                // 棋子目标点位设置虚线边框
                 if (lastMove.getDestPosition().equals(position)) {
                     setBorder(HIGHLIGHT_LAST_MOVE_BORDER);
                     return;
                 }
             }
 
+            // 选中的棋子不为空且选中棋子的位置与当前位置是同一位置，设置虚线边框
             if (selectedPiece != null && selectedPiece.getPosition().equals(position)) {
                 setBorder(HIGHLIGHT_SELECTED_PIECE_BORDER);
                 return;
             }
 
+            // 默认不设置边框
             setBorder(null);
         }
 
         /**
-         * Highlights (using a dot) this point pane if it is one of the legal destinations of the selected piece.
+         * 如果此点符合所选棋子规则行棋位置之一，则高亮显示(使用圆点)
          *
-         * @param board The current board.
+         * @param board 当前棋盘.
          */
         private void highlightPossibleMoves(Board board) {
+            // 不高亮显示移动路径，跳过
             if (!highlightLegalMoves) {
                 return;
             }
+            // 遍历所选棋子所有可以采取的合法走法
             for (Move move : pieceLegalMoves(board)) {
+                // 检查自杀行为
                 board.makeMove(move);
-                // check for suicidal move
                 if (!board.isStateAllowed()) {
+                    // 撤销移动
                     board.unmakeMove(move);
                     continue;
                 }
+                // 撤销移动
                 board.unmakeMove(move);
-                // legal AND non-suicidal move
+
+                // 合法且非自杀性的落点,使用圆点高亮显示
                 if (move.getDestPosition().equals(position)) {
                     Label label = new Label();
                     label.setGraphic(new ImageView(HIGHLIGHT_LEGALS_IMAGE));
@@ -891,13 +959,13 @@ public class Table extends BorderPane {
         }
 
         /**
-         * Returns a collection of legal moves of the selected piece.
+         * 返回符合所选棋子在给定棋盘上可以采取的合法走法的集合
+         *
+         * @param board 当前棋盘
+         * @return 符合所选棋子在给定棋盘上可以采取的合法走法的集合
          */
         private Collection<Move> pieceLegalMoves(Board board) {
-            if (selectedPiece != null) {
-                return selectedPiece.getLegalMoves(board);
-            }
-            return Collections.emptyList();
+            return selectedPiece != null ? selectedPiece.getLegalMoves(board) : Collections.emptyList();
         }
     }
 

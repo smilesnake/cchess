@@ -6,7 +6,7 @@ import com.chess.engine.pieces.Piece;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.chess.engine.pieces.Piece.*;
+import static com.chess.engine.pieces.Piece.PieceType;
 
 /**
  * Represents a player move made on the board.
@@ -16,6 +16,9 @@ public class Move {
     private final long zobristKey;
     private final Piece movedPiece;
     private final Coordinate destPosition;
+    /**
+     * 被吃的棋子
+     */
     private final Piece capturedPiece;
 
     public Move(long zobristKey, Piece movedPiece, Coordinate destPosition, Piece capturedPiece) {
@@ -31,8 +34,9 @@ public class Move {
 
     /**
      * Returns a move, if any, corresponding to the given string notation.
+     *
      * @param board The board to make a move on.
-     * @param str The string notation.
+     * @param str   The string notation.
      * @return A move, if any, corresponding to the given string notation.
      */
     public static Optional<Move> stringToMove(Board board, String str) {
@@ -105,10 +109,7 @@ public class Move {
         String newRank = rankToString(BoardUtil.rowToRank(destPosition.getRow(), alliance));
         String newFile = Integer.toString(BoardUtil.colToFile(destPosition.getCol(), alliance));
 
-        return getPieceAbbrev(pieceType, alliance) +
-                formerRank + formerFile +
-                "-" +
-                newRank + newFile;
+        return getPieceAbbrev(pieceType, alliance) + formerRank + formerFile + "-" + newRank + newFile;
     }
 
     @Override
@@ -120,10 +121,7 @@ public class Move {
             return false;
         }
         Move other = (Move) obj;
-        return this.zobristKey == other.zobristKey
-                && this.movedPiece.equals(other.movedPiece)
-                && this.destPosition.equals(other.destPosition)
-                && this.getCapturedPiece().equals(other.getCapturedPiece());
+        return this.zobristKey == other.zobristKey && this.movedPiece.equals(other.movedPiece) && this.destPosition.equals(other.destPosition) && this.getCapturedPiece().equals(other.getCapturedPiece());
     }
 
     @Override
