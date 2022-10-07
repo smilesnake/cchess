@@ -709,6 +709,9 @@ public class Table extends BorderPane {
     private class BoardPane extends GridPane {
 
         private final List<PointPane> pointPanes;
+        /**
+         * 棋盘的方向
+         */
         private BoardDirection boardDirection;
 
         private BoardPane() {
@@ -742,10 +745,11 @@ public class Table extends BorderPane {
             for (PointPane pointPane : pointPanes) {
                 // 绘制点位
                 pointPane.drawPoint(board);
+                // 正常方向
                 if (boardDirection.isNormal()) {
-                    add(pointPane, pointPane.position.getCol(), pointPane.position.getRow());
-                } else {
-                    add(pointPane, Board.NUM_COLS - pointPane.position.getCol(), Board.NUM_ROWS - pointPane.position.getRow());
+                    super.add(pointPane, pointPane.position.getCol(), pointPane.position.getRow());
+                } else { // 翻转后的方向
+                    super.add(pointPane, Board.NUM_COLS - pointPane.position.getCol(), Board.NUM_ROWS - pointPane.position.getRow());
                 }
             }
         }
@@ -761,9 +765,12 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Represents the direction of the board.
+     * 棋盘的方向
      */
     public enum BoardDirection {
+        /**
+         * 正常的
+         */
         NORMAL {
             @Override
             boolean isNormal() {
@@ -774,7 +781,11 @@ public class Table extends BorderPane {
             BoardDirection opposite() {
                 return FLIPPED;
             }
-        }, FLIPPED {
+        },
+        /**
+         * 翻转
+         */
+        FLIPPED {
             @Override
             boolean isNormal() {
                 return false;
@@ -786,8 +797,18 @@ public class Table extends BorderPane {
             }
         };
 
+        /**
+         * 是否标准的
+         *
+         * @return true, 标准，否则，false
+         */
         abstract boolean isNormal();
 
+        /**
+         * 对手
+         *
+         * @return 对手所属方向（正常或翻转）
+         */
         abstract BoardDirection opposite();
     }
 

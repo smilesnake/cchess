@@ -249,28 +249,34 @@ public class Board {
     }
 
     /**
-     * Checks if the current player's opponent is in check. Such a state is not allowed.
+     * 检查当前玩家的对手是否处于受控状态。这种状态是不允许的
      *
-     * @return true if the current player's opponent is NOT in check, false otherwise.
+     * @return 如果对手不处于受控状态，true，否则，false
      */
     public boolean isStateAllowed() {
         return !getOppPlayer().isInCheck();
     }
 
     /**
-     * Checks if the current player has been checkmated.
+     * 检查当前玩家是否已被将死
      *
-     * @return true if the current player has been checkmated, false otherwise.
+     * @return 如果当前玩家已被将，则为true，否则为false.
      */
     public boolean isCurrPlayerCheckmated() {
+        // 默认为“将死”状态
         boolean isCheckmated = true;
 
+        // 遍历当前玩家所有可以采取的合法走法的集合
         for (Move move : getCurrPlayer().getLegalMoves()) {
+            // 棋盘上做出给定的移动
             makeMove(move);
+            // 非受控状态,设置为非“将死”状态
             if (isStateAllowed()) {
                 isCheckmated = false;
             }
+            // 撤销棋盘上的给定走法
             unmakeMove(move);
+            // 如果已经设置为非“将死”状态，跳出
             if (!isCheckmated) break;
         }
 

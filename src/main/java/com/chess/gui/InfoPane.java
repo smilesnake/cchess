@@ -67,8 +67,11 @@ class InfoPane extends BorderPane {
      * @param movelog 当前移动日志.
      */
     void update(Board board, MoveLog movelog) {
+        // （红方）根据给定的移动日志更新吃子的面板
         redCapturedPane.update(movelog);
+        // （黑方）根据给定的移动日志更新吃子的面板
         blackCapturedPane.update(movelog);
+        // 更新状态
         statusPane.update(board);
     }
 
@@ -197,11 +200,12 @@ class InfoPane extends BorderPane {
         }
 
         /**
-         * Updates this status pane based on the given board.
+         * 根据给定的棋盘更新此状态面板
          */
         private void update(Board board) {
             getChildren().clear();
 
+            //
             if (board.isCurrPlayerCheckmated()) {
                 Label gameOverLabel = new Label(board.getOppPlayer().getAlliance().toString() + " wins");
                 gameOverLabel.setFont(TOP_FONT);
