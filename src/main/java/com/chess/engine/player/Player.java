@@ -13,21 +13,27 @@ import java.util.List;
 import static com.chess.engine.pieces.Piece.*;
 
 /**
- * Represents a player of Chinese Chess.
+ * 中国象棋棋手.
  */
 public class Player {
-
+    /**
+     * 当前玩家所属阵营（红方或黑方）
+     */
     private final Alliance alliance;
+    /**
+     * 当前玩家可以活动的棋子集合
+     */
     private final Collection<Piece> activePieces;
+    /**
+     * 当前玩家在给定棋盘上可以采取的合法走法的集合
+     */
     private final Collection<Move> legalMoves;
     private final boolean isInCheck;
     private final int totalMobilityValue;
     private final Collection<Attack> attacks;
     private final Collection<Defense> defenses;
 
-    public Player(Alliance alliance, Collection<Piece> activePieces, Collection<Move> legalMoves,
-                  Collection<Move> oppLegalMoves, int totalMobilityValue,
-                  Collection<Attack> attacks, Collection<Defense> defenses) {
+    public Player(Alliance alliance, Collection<Piece> activePieces, Collection<Move> legalMoves, Collection<Move> oppLegalMoves, int totalMobilityValue, Collection<Attack> attacks, Collection<Defense> defenses) {
         this.alliance = alliance;
         this.activePieces = activePieces;
         this.legalMoves = legalMoves;
@@ -73,6 +79,11 @@ public class Player {
         return Collections.unmodifiableCollection(activePieces);
     }
 
+    /**
+     * 获取当前玩家在给定棋盘上可以采取的合法走法的集合
+     *
+     * @return 当前玩家在给定棋盘上可以采取的合法走法的集合
+     */
     public Collection<Move> getLegalMoves() {
         return Collections.unmodifiableCollection(legalMoves);
     }

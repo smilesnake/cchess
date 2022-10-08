@@ -13,9 +13,21 @@ import static com.chess.engine.pieces.Piece.*;
  */
 public class Board {
 
+    /**
+     * 行的数量
+     */
     public static final int NUM_ROWS = 10;
+    /**
+     * 列的数量
+     */
     public static final int NUM_COLS = 9;
+    /**
+     * 红方河所在行
+     */
     public static final int RIVER_ROW_RED = 5;
+    /**
+     * 黑方河所在行
+     */
     public static final int RIVER_ROW_BLACK = 4;
     private static final Zobrist ZOBRIST = new Zobrist();
 
@@ -235,18 +247,21 @@ public class Board {
     }
 
     /**
-     * Returns a move, if any, corresponding to the given source and destination positions on this board.
+     * 获取此棋盘上给定的源位置和目标位置相对应的移动(如果有的话)
      *
-     * @param srcPosition  The source position.
-     * @param destPosition The destination position.
-     * @return A move, if any, corresponding to the given source and destination positions on this board.
+     * @param srcPosition  给定的源位置
+     * @param destPosition 目标位置
+     * @return 此棋盘上给定的源位置和目标位置相对应的移动
      */
     public Optional<Move> getMove(Coordinate srcPosition, Coordinate destPosition) {
+        // 遍历当前玩家在给定棋盘上可以采取的合法走法的集合
         for (Move move : getCurrPlayer().getLegalMoves()) {
+            // 当前走法是合法的返回
             if (move.getMovedPiece().getPosition().equals(srcPosition) && move.getDestPosition().equals(destPosition)) {
                 return Optional.of(move);
             }
         }
+        // 不合法，直接返回空
         return Optional.empty();
     }
 
@@ -408,6 +423,12 @@ public class Board {
         }
     }
 
+    /**
+     * 获取指定位置对应的点位
+     *
+     * @param position 指定位置
+     * @return 指定位置对应的点位
+     */
     public Point getPoint(Coordinate position) {
         return points.get(BoardUtil.positionToIndex(position));
     }
