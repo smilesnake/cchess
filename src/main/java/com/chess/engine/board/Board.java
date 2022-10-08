@@ -71,7 +71,9 @@ public class Board {
 
 
     /**
-     * Generates information related to both players on this board.
+     * 生成与此棋盘上两个玩家相关的信息
+     *
+     * @return 生成的玩家信息
      */
     private PlayerInfo generatePlayerInfo() {
         Collection<Piece> redPieces = new ArrayList<>();
@@ -284,17 +286,20 @@ public class Board {
     }
 
     /**
-     * Checks if the game on this board is a draw.
+     * 检查棋盘上的游戏是不是和棋.
      *
-     * @return true if the game is a draw, false otherwise.
+     * @return 如果是平局则为true，否则为false.
      */
     public boolean isGameDraw() {
+
         for (Piece piece : getPlayer(Alliance.RED).getActivePieces()) {
+            // 如果有攻击性，说明不是和棋
             if (piece.getPieceType().isAttacking()) {
                 return false;
             }
         }
         for (Piece piece : getPlayer(Alliance.BLACK).getActivePieces()) {
+            // 如果有攻击性，说明不是和棋
             if (piece.getPieceType().isAttacking()) {
                 return false;
             }

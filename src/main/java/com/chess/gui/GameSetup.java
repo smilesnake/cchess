@@ -218,6 +218,11 @@ class GameSetup extends Dialog {
         return aiType.isTimeLimited();
     }
 
+    /**
+     * 当前AI的移动是否是随机的
+     *
+     * @return true，随机，否则，false
+     */
     boolean isAIRandomised() {
         return isAIRandomised;
     }

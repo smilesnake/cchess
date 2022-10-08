@@ -17,13 +17,26 @@ public abstract class Piece {
      * 所属阵营（红方或黑方）
      */
     protected final Alliance alliance;
+    /**
+     * 所属位置
+     */
     protected final Coordinate position;
     /**
      * 棋子类型，如車、炮等
      */
     private final PieceType pieceType;
+    /**
+     * 哈希码
+     */
     private final int hashCode;
 
+    /**
+     * 构造棋子
+     *
+     * @param pieceType 棋子类型
+     * @param position
+     * @param alliance
+     */
     Piece(PieceType pieceType, Coordinate position, Alliance alliance) {
         this.pieceType = pieceType;
         this.position = position;
@@ -131,21 +144,83 @@ public abstract class Piece {
     }
 
     /**
-     * Represents the type of a piece.
+     * 棋子的类型
      */
     public enum PieceType {
+        /**
+         * 卒/兵
+         */
+        SOLDIER("S", MIDGAME_VALUES_SOLDIER, ENDGAME_VALUES_SOLDIER, 1, 3, 0, 1, 1),
+        /**
+         * 士/仕
+         */
+        ADVISOR("A", VALUES_ADVISOR, VALUES_ADVISOR, 0, 3, 0, 0, 1),
+        /**
+         * 象/相
+         */
+        ELEPHANT("E", VALUES_ELEPHANT, VALUES_ELEPHANT, 0, 3, 0, 0, 1),
+        /**
+         * 马
+         */
+        HORSE("H", MIDGAME_VALUES_HORSE, ENDGAME_VALUES_HORSE, 5, 2, 1, 2, 3),
+        /**
+         * 炮
+         */
+        CANNON("C", MIDGAME_VALUES_CANNON, ENDGAME_VALUES_CANNON, 1, 2, 1, 1, 3),
+        /**
+         * 车
+         */
+        CHARIOT("R", MIDGAME_VALUES_CHARIOT, ENDGAME_VALUES_CHARIOT, 3, 1, 2, 2, 6),
+        /**
+         * 将/帅
+         */
+        GENERAL("G", MIDGAME_VALUES_GENERAL, ENDGAME_VALUES_GENERAL, 0, 4, 0, 0, 0);
 
-        SOLDIER("S", MIDGAME_VALUES_SOLDIER, ENDGAME_VALUES_SOLDIER, 1, 3, 0, 1, 1), ADVISOR("A", VALUES_ADVISOR, VALUES_ADVISOR, 0, 3, 0, 0, 1), ELEPHANT("E", VALUES_ELEPHANT, VALUES_ELEPHANT, 0, 3, 0, 0, 1), HORSE("H", MIDGAME_VALUES_HORSE, ENDGAME_VALUES_HORSE, 5, 2, 1, 2, 3), CANNON("C", MIDGAME_VALUES_CANNON, ENDGAME_VALUES_CANNON, 1, 2, 1, 1, 3), CHARIOT("R", MIDGAME_VALUES_CHARIOT, ENDGAME_VALUES_CHARIOT, 3, 1, 2, 2, 6), GENERAL("G", MIDGAME_VALUES_GENERAL, ENDGAME_VALUES_GENERAL, 0, 4, 0, 0, 0);
-
+        /**
+         * 简写
+         */
         private final String abbrev;
+        /**
+         * 中局值
+         */
         private final int[][] midGameValues;
+        /**
+         * 终局值
+         */
         private final int[][] endGameValues;
+        /**
+         * 机动性值
+         */
         private final int mobilityValue;
+        /**
+         * 移动的优先级
+         */
         private final int movePriority;
+        /**
+         * 值单位
+         */
         private final int valueUnits;
+        /**
+         * 攻击性
+         */
         private final int attackUnits;
+        /**
+         * 简单的单位
+         */
         private final int simpleUnits;
 
+        /**
+         * 构造
+         *
+         * @param abbrev        简写
+         * @param midGameValues 中局值
+         * @param endGameValues 终局值
+         * @param mobilityValue 灵活性
+         * @param movePriority  移动的优先级
+         * @param valueUnits    值单位
+         * @param attackUnits   攻击性
+         * @param simpleUnits   简单的单位
+         */
         PieceType(String abbrev, int[][] midGameValues, int[][] endGameValues, int mobilityValue, int movePriority, int valueUnits, int attackUnits, int simpleUnits) {
             this.abbrev = abbrev;
             this.midGameValues = midGameValues;
@@ -157,26 +232,56 @@ public abstract class Piece {
             this.simpleUnits = simpleUnits;
         }
 
+        /**
+         * 是否正在攻击
+         *
+         * @return true, 正在攻击，否则，false
+         */
         public boolean isAttacking() {
             return attackUnits > 0;
         }
 
+        /**
+         * 获取机动性值
+         *
+         * @return 机动性值
+         */
         public int getMobilityValue() {
             return mobilityValue;
         }
 
+        /**
+         * 获取移动的优先级
+         *
+         * @return 移动的优先级
+         */
         public int getMovePriority() {
             return movePriority;
         }
 
+        /**
+         * 获取值单位
+         *
+         * @return 值单位
+         */
         public int getValueUnits() {
             return valueUnits;
         }
 
+        /**
+         * 获取攻击性
+         *
+         * @return 攻击性
+         */
         public int getAttackUnits() {
             return attackUnits;
         }
 
+        /**
+         * 获取简单的单位
+         *
+         * @return 简单的单位
+         */
         public int getSimpleUnits() {
             return simpleUnits;
         }

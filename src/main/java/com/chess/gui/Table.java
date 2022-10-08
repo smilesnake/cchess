@@ -224,7 +224,8 @@ public class Table extends BorderPane {
                     exitReplayMode();
                     // 重新开始
                     restart();
-                    notifyAIObserver("新游戏");
+                    // 通知AI
+                    notifyAIObserver("newgame");
                 }
             });
         });
@@ -386,10 +387,12 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Restarts the game.
+     * 重新开始游戏.
      */
     private void restart() {
+        // 清除所有鼠标选择
         clearSelections();
+        // 初始化棋盘
         board = Board.initialiseBoard();
         fullMovelog.clear();
         bannedMoves.clear();
@@ -552,16 +555,18 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Notifies the AI observer with the given property name.
+     * 用给定的属性名通知AI观察者
+     *
+     * @param propertyName 给定的属性名
      */
     private void notifyAIObserver(String propertyName) {
         propertyChangeSupport.firePropertyChange(propertyName, null, null);
     }
 
     /**
-     * Checks if the current AI's moves are randomised.
+     * 检查当前AI的移动是否是随机的
      *
-     * @return true if the current AI's moves are randomised, false otherwise.
+     * @return 如果当前AI的移动是随机的，则为true，否则为false.
      */
     public boolean isAIRandomised() {
         return gameSetup.isAIRandomised();
@@ -591,17 +596,21 @@ public class Table extends BorderPane {
     }
 
     /**
-     * Returns a mapping from a string representing a piece to its corresponding image.
+     * 获取棋子的字符串与其对应图片的Map
+     *
+     * @return 棋子的字符串与其对应图片的Map
      */
     private static Map<String, Image> getPieceImageMap() {
         Map<String, Image> pieceImageMap = new HashMap<>();
 
         for (PieceType pieceType : PieceType.values()) {
+            // 红方
             String name = ("R" + pieceType.toString()).toLowerCase();
             Image image = new Image(Table.class.getResourceAsStream(GuiUtil.GRAPHICS_PIECES_PATH + name + ".png"));
             pieceImageMap.put(name, image);
 
-            name = ("B" + pieceType.toString()).toLowerCase();
+            // 黑方
+            name = ("B" + pieceType).toLowerCase();
             image = new Image(Table.class.getResourceAsStream(GuiUtil.GRAPHICS_PIECES_PATH + name + ".png"));
             pieceImageMap.put(name, image);
         }
@@ -708,30 +717,40 @@ public class Table extends BorderPane {
      */
     private class BoardPane extends GridPane {
 
+        /**
+         * 点面板列表
+         */
         private final List<PointPane> pointPanes;
         /**
          * 棋盘的方向
          */
         private BoardDirection boardDirection;
 
+        /**
+         * 构造
+         */
         private BoardPane() {
             pointPanes = new ArrayList<>();
+            // 默认是正常的
             boardDirection = BoardDirection.NORMAL;
 
+            // 添加子组件
             for (int row = 0; row < Board.NUM_ROWS; row++) {
                 for (int col = 0; col < Board.NUM_COLS; col++) {
                     PointPane pointPane = new PointPane(new Coordinate(row, col));
+                    // 添加点面板
                     pointPanes.add(pointPane);
-                    add(pointPane, col, row);
+                    super.add(pointPane, col, row);
                 }
             }
 
+            // 设置棋盘背景，大小
             BackgroundImage boardImage = new BackgroundImage(BOARD_IMAGE, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, null, null);
-            setBackground(new Background(boardImage));
-            setPrefSize(BOARD_WIDTH, BOARD_HEIGHT);
-            setMinSize(BOARD_WIDTH, BOARD_HEIGHT);
-            setMaxSize(BOARD_WIDTH, BOARD_HEIGHT);
-            setGridLinesVisible(false);
+            super.setBackground(new Background(boardImage));
+            super.setPrefSize(BOARD_WIDTH, BOARD_HEIGHT);
+            super.setMinSize(BOARD_WIDTH, BOARD_HEIGHT);
+            super.setMaxSize(BOARD_WIDTH, BOARD_HEIGHT);
+            super.setGridLinesVisible(false);
         }
 
         /**
@@ -755,11 +774,13 @@ public class Table extends BorderPane {
         }
 
         /**
-         * Flips the current board.
+         * 翻转当前棋盘.
          */
         private void flipBoard() {
+            // 变更方向后绘制面板
             boardDirection = boardDirection.opposite();
-            drawBoard(board);
+            this.drawBoard(board);
+            // 变更信息面板的方向
             infoPane.setDirection(boardDirection);
         }
     }

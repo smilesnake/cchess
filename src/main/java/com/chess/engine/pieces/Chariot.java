@@ -12,6 +12,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ *
+ */
 public class Chariot extends Piece {
 
     private static final List<Coordinate> MOVE_VECTORS =
