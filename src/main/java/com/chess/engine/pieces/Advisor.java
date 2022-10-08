@@ -45,7 +45,7 @@ public class Advisor extends Piece {
             Coordinate destPosition = position.add(vector);
             // 验证位置是否有效
             if (isValidPosition(destPosition)) {
-                // 指定位置的棋子
+                // 目标位置的棋子
                 Optional<Piece> destPiece = board.getPoint(destPosition).getPiece();
                 // 将移动加入至当前棋子在给定棋盘上可以采取的合法走法的集合
                 destPiece.ifPresentOrElse(p -> {
@@ -75,7 +75,7 @@ public class Advisor extends Piece {
             Coordinate destPosition = position.add(vector);
             // 验证位置是否有效
             if (isValidPosition(destPosition)) {
-                // 指定位置的棋子
+                // 目标位置的棋子
                 Optional<Piece> destPiece = board.getPoint(destPosition).getPiece();
                 // 将移动加入至当前棋子在给定棋盘上可以采取的合法走法的集合
                 destPiece.ifPresentOrElse(p -> {

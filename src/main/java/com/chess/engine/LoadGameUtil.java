@@ -33,17 +33,22 @@ public class LoadGameUtil {
         moves = new ArrayList<>();
         isValid = true;
 
+        // 初始化棋盘
         board = Board.initialiseBoard();
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String str;
 
             while (isValid && (str = br.readLine()) != null) {
+                // 给定字符串转换为落子对象，即棋手在棋盘上的移动
                 Optional<Move> move = Move.stringToMove(board, str);
                 if (move.isPresent()) {
+                    // 落子
                     board.makeMove(move.get());
+                    // 添加落子记录
                     moves.add(move.get());
                 } else {
+                    // 无效字符串
                     isValid = false;
                 }
             }
@@ -53,14 +58,29 @@ public class LoadGameUtil {
         }
     }
 
+    /**
+     * 获取当前棋盘
+     *
+     * @return 当前棋盘对象
+     */
     public Board getBoard() {
         return board;
     }
 
+    /**
+     * 获取落子记录
+     *
+     * @return 落子记录
+     */
     public List<Move> getMoves() {
         return moves;
     }
 
+    /**
+     * 文件是否有效
+     *
+     * @return true, 有效，否则，无效
+     */
     public boolean isValidFile() {
         return isValid;
     }

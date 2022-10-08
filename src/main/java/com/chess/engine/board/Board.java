@@ -40,6 +40,11 @@ public class Board {
      */
     private long zobristKey;
 
+    /**
+     * 构造
+     *
+     * @param builder 棋盘构造器
+     */
     private Board(Builder builder) {
         points = createBoard(builder);
         playerInfoHistory = new ArrayList<>();
@@ -67,14 +72,46 @@ public class Board {
     }
 
     /**
-     * Returns the original state of a board.
+     * 初始化棋盘
+     *
+     * @return 初始化后的棋盘
      */
     public static Board initialiseBoard() {
         Builder builder = new Builder();
 
-        builder.putPiece(new Chariot(new Coordinate(0, 0), Alliance.BLACK)).putPiece(new Horse(new Coordinate(0, 1), Alliance.BLACK)).putPiece(new Elephant(new Coordinate(0, 2), Alliance.BLACK)).putPiece(new Advisor(new Coordinate(0, 3), Alliance.BLACK)).putPiece(new General(new Coordinate(0, 4), Alliance.BLACK)).putPiece(new Advisor(new Coordinate(0, 5), Alliance.BLACK)).putPiece(new Elephant(new Coordinate(0, 6), Alliance.BLACK)).putPiece(new Horse(new Coordinate(0, 7), Alliance.BLACK)).putPiece(new Chariot(new Coordinate(0, 8), Alliance.BLACK)).putPiece(new Cannon(new Coordinate(2, 1), Alliance.BLACK)).putPiece(new Cannon(new Coordinate(2, 7), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 0), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 2), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 4), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 6), Alliance.BLACK)).putPiece(new Soldier(new Coordinate(3, 8), Alliance.BLACK));
+        builder.putPiece(new Chariot(new Coordinate(0, 0), Alliance.BLACK)) // 车
+                .putPiece(new Horse(new Coordinate(0, 1), Alliance.BLACK)) // 马
+                .putPiece(new Elephant(new Coordinate(0, 2), Alliance.BLACK)) // 象/相
+                .putPiece(new Advisor(new Coordinate(0, 3), Alliance.BLACK)) // 士/仕
+                .putPiece(new General(new Coordinate(0, 4), Alliance.BLACK)) // 将/帅
+                .putPiece(new Advisor(new Coordinate(0, 5), Alliance.BLACK)) // 士/仕
+                .putPiece(new Elephant(new Coordinate(0, 6), Alliance.BLACK)) // 象/相
+                .putPiece(new Horse(new Coordinate(0, 7), Alliance.BLACK)) // 马
+                .putPiece(new Chariot(new Coordinate(0, 8), Alliance.BLACK)) // 车
+                .putPiece(new Cannon(new Coordinate(2, 1), Alliance.BLACK)) // 炮
+                .putPiece(new Cannon(new Coordinate(2, 7), Alliance.BLACK)) // 炮
+                .putPiece(new Soldier(new Coordinate(3, 0), Alliance.BLACK)) // 卒/兵
+                .putPiece(new Soldier(new Coordinate(3, 2), Alliance.BLACK)) // 卒/兵
+                .putPiece(new Soldier(new Coordinate(3, 4), Alliance.BLACK)) // 卒/兵
+                .putPiece(new Soldier(new Coordinate(3, 6), Alliance.BLACK)) // 卒/兵
+                .putPiece(new Soldier(new Coordinate(3, 8), Alliance.BLACK)); // 卒/兵
 
-        builder.putPiece(new Chariot(new Coordinate(9, 0), Alliance.RED)).putPiece(new Horse(new Coordinate(9, 1), Alliance.RED)).putPiece(new Elephant(new Coordinate(9, 2), Alliance.RED)).putPiece(new Advisor(new Coordinate(9, 3), Alliance.RED)).putPiece(new General(new Coordinate(9, 4), Alliance.RED)).putPiece(new Advisor(new Coordinate(9, 5), Alliance.RED)).putPiece(new Elephant(new Coordinate(9, 6), Alliance.RED)).putPiece(new Horse(new Coordinate(9, 7), Alliance.RED)).putPiece(new Chariot(new Coordinate(9, 8), Alliance.RED)).putPiece(new Cannon(new Coordinate(7, 1), Alliance.RED)).putPiece(new Cannon(new Coordinate(7, 7), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 0), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 2), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 4), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 6), Alliance.RED)).putPiece(new Soldier(new Coordinate(6, 8), Alliance.RED));
+        builder.putPiece(new Chariot(new Coordinate(9, 0), Alliance.RED)) // 车
+                .putPiece(new Horse(new Coordinate(9, 1), Alliance.RED)) // 马
+                .putPiece(new Elephant(new Coordinate(9, 2), Alliance.RED)) // 象/相
+                .putPiece(new Advisor(new Coordinate(9, 3), Alliance.RED)) // 士/仕
+                .putPiece(new General(new Coordinate(9, 4), Alliance.RED)) // 将/帅
+                .putPiece(new Advisor(new Coordinate(9, 5), Alliance.RED)) // 士/仕
+                .putPiece(new Elephant(new Coordinate(9, 6), Alliance.RED)) // 象/相
+                .putPiece(new Horse(new Coordinate(9, 7), Alliance.RED)) // 马
+                .putPiece(new Chariot(new Coordinate(9, 8), Alliance.RED)) // 车
+                .putPiece(new Cannon(new Coordinate(7, 1), Alliance.RED)) // 炮
+                .putPiece(new Cannon(new Coordinate(7, 7), Alliance.RED)) // 炮
+                .putPiece(new Soldier(new Coordinate(6, 0), Alliance.RED)) // 卒/兵
+                .putPiece(new Soldier(new Coordinate(6, 2), Alliance.RED)) // 卒/兵
+                .putPiece(new Soldier(new Coordinate(6, 4), Alliance.RED)) // 卒/兵
+                .putPiece(new Soldier(new Coordinate(6, 6), Alliance.RED)) // 卒/兵
+                .putPiece(new Soldier(new Coordinate(6, 8), Alliance.RED)); // 卒/兵
 
         builder.setCurrTurn(Alliance.RED);
 
@@ -558,27 +595,50 @@ public class Board {
     }
 
     /**
-     * A helper class for building a board.
+     * 用于构建棋盘的帮助类
      */
     static class Builder {
 
+        /**
+         * 棋盘配置
+         */
         private Map<Coordinate, Piece> boardConfig;
+        /**
+         * 当前回合
+         */
         private Alliance currTurn;
 
         Builder() {
             boardConfig = new HashMap<>();
         }
 
+        /**
+         * 落子
+         *
+         * @param piece 棋子
+         * @return 构建对象
+         */
         Builder putPiece(Piece piece) {
             boardConfig.put(piece.getPosition(), piece);
             return this;
         }
 
+        /**
+         * 设置当前回合所属阵营
+         *
+         * @param currTurn 当前回合所属阵营
+         * @return 构建对象
+         */
         Builder setCurrTurn(Alliance currTurn) {
             this.currTurn = currTurn;
             return this;
         }
 
+        /**
+         * 返回当前棋盘
+         *
+         * @return 当前构建的棋盘
+         */
         Board build() {
             return new Board(this);
         }
