@@ -40,6 +40,7 @@ public class Advisor extends Piece {
         // 当前棋子在给定棋盘上可以采取的合法走法的集合
         List<Move> legalMoves = new ArrayList<>();
 
+        // 遍历移动的向量
         for (Coordinate vector : MOVE_VECTORS) {
             // 目标位置
             Coordinate destPosition = position.add(vector);
@@ -70,6 +71,7 @@ public class Advisor extends Piece {
         // 防御棋子列表.
         List<Piece> defendedPieces = new ArrayList<>();
 
+        // 遍历移动的向量
         for (Coordinate vector : MOVE_VECTORS) {
             // 目标位置
             Coordinate destPosition = position.add(vector);
